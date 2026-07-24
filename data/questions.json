@@ -1,0 +1,839 @@
+[
+  {
+    "codigo": "P1w",
+    "texto": "¿Cuál es su sexo? Considerar su sexo registral (Registro Civil).",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Mujer"
+      },
+      {
+        "etiqueta": "Hombre"
+      },
+      {
+        "etiqueta": "Intersexo"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P2w",
+    "texto": "¿Con qué género se identifica?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Femenino"
+      },
+      {
+        "etiqueta": "Masculino"
+      },
+      {
+        "etiqueta": "Otro"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P3w",
+    "texto": "¿En qué rango de edad se encuentra actualmente?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas 18 a 28 años"
+      },
+      {
+        "etiqueta": "29 a 43 años"
+      },
+      {
+        "etiqueta": "44 a 59 años"
+      },
+      {
+        "etiqueta": "60 años o más"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P4w",
+    "texto": "¿Cuál es el último nivel educacional que terminó?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Enseñanza básica o primaria incompleta"
+      },
+      {
+        "etiqueta": "Enseñanza básica o primaria completa"
+      },
+      {
+        "etiqueta": "Enseñanza media o secundaria"
+      },
+      {
+        "etiqueta": "Técnico profesional"
+      },
+      {
+        "etiqueta": "Universitaria"
+      },
+      {
+        "etiqueta": "Postítulo"
+      },
+      {
+        "etiqueta": "Posgrado (magíster o máster, doctorado o PhD)"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P5w",
+    "texto": "¿Cuál es su antigüedad en la Dirección de Servicio?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Menos de 2 años"
+      },
+      {
+        "etiqueta": "Entre 2 y 5 años"
+      },
+      {
+        "etiqueta": "Entre 6 y 10 años"
+      },
+      {
+        "etiqueta": "Más de 10 años"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P6w",
+    "texto": "¿Cuál es su rol dentro de la Dirección de Servicio?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Directivo y/o Jefatura"
+      },
+      {
+        "etiqueta": "Profesional"
+      },
+      {
+        "etiqueta": "Administrativo/Auxiliar/Técnico"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P7w",
+    "texto": "¿A qué Dirección/Subdirección pertenece?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Dirección"
+      },
+      {
+        "etiqueta": "Subdirección de Desarrollo de las Personas"
+      },
+      {
+        "etiqueta": "Subdirección de Gestión Asistencial"
+      },
+      {
+        "etiqueta": "Subdirección de Gestión de Personas"
+      },
+      {
+        "etiqueta": "Subdirección de RRFF y Financiero"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P8w",
+    "texto": "¿Cuál es su calidad jurídica?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Planta"
+      },
+      {
+        "etiqueta": "Contrata"
+      },
+      {
+        "etiqueta": "Honorarios"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P9w",
+    "texto": "¿Tiene hijos(as) e/o hijastros(as)?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Sí"
+      },
+      {
+        "etiqueta": "No"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P10w",
+    "texto": "¿Qué edad tiene(n) su(s) hijos(as) e/o hijastros(as)? Seleccionar todas las edades que correspondan.",
+    "tipo": "multiple",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Menos de 2 años"
+      },
+      {
+        "etiqueta": "Entre 2 y 5 años"
+      },
+      {
+        "etiqueta": "Entre 6 y 13 años"
+      },
+      {
+        "etiqueta": "Entre 14 y 17 años"
+      },
+      {
+        "etiqueta": "Más de 18 años"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P11w",
+    "texto": "¿Tiene a su cargo? (sin recibir remuneración por dicha actividad):Por favor, responda \"Sí\" o \"No\" en cada alternativa:",
+    "tipo": "matriz_dicotomica",
+    "opciones": [],
+    "items": [
+      "El cuidado personal de niños(as) menores de 14 años(Considere hijos(as) menores de 14 años y/o otros(as) niños(as) menores de 14 años).",
+      "El cuidado de persona(s) (independiente de su edad) con discapacidad",
+      "El cuidado de persona(s) (independiente de su edad) en situación de dependencia severa o moderada",
+      "El cuidado de persona(s) (independiente de su edad) con enfermedad grave",
+      "El cuidado de persona(s) de edad avanzada"
+    ]
+  },
+  {
+    "codigo": "P12w",
+    "texto": "¿Hay alguna(s) mascota(s) que forme(n) parte de su hogar?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Sí"
+      },
+      {
+        "etiqueta": "No"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P13w",
+    "texto": "Sin considerar la presencia de mascotas, ¿Cuál es la composición de su hogar?Seleccione la alternativa que mejor refleje quienes viven en su hogar la mayor parte del tiempo.",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Hogar unipersonal: Vivo solo(a)"
+      },
+      {
+        "etiqueta": "Hogar sin núcleo: Vivo con otra(s) persona(s) que no son mi pareja, madre, padre o hijos(as). Ej.: vivo con amigos u otros familiares"
+      },
+      {
+        "etiqueta": "Hogar nuclear sin hijos(as): Vivo con mi esposo(a), conviviente civil o pareja, sin hijos(as)"
+      },
+      {
+        "etiqueta": "Hogar nuclear biparental: Vivo con mi esposo(a), conviviente civil o pareja y nuestro(s) hijos(as) O vivo con mi padre y madre"
+      },
+      {
+        "etiqueta": "Hogar ensamblado: Vivo con mi esposo(a), conviviente civil o pareja e hijos(as) que son de uniones anteriores"
+      },
+      {
+        "etiqueta": "Hogar extenso biparental: Vivo con mi esposo(a), conviviente civil o pareja, con o sin hijos(as), y otro(s) pariente(s)"
+      },
+      {
+        "etiqueta": "Hogar nuclear monoparental con hijos(as): Vivo solo(a) con mis hijos(as)"
+      },
+      {
+        "etiqueta": "Hogar nuclear monoparental con padre/madre: Vivo con mi madre o mi padre"
+      },
+      {
+        "etiqueta": "Hogar extenso monoparental: Vivo con mi madre o mi padre o mis hijos(as) y otro(s) pariente(s)"
+      },
+      {
+        "etiqueta": "Hogar compuesto: Vivo con mi madre o mi padre o mis hijos(as), con otro(s) pariente(s) y con no pariente(s)"
+      },
+      {
+        "etiqueta": "Hogar con hijos(as) algunos días del mes: No vivo con madre/padre de mis hijos(as), por lo que algunos días del mes viven en su casa y otros días del mes viven conmigo"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P14w",
+    "texto": "En su hogar, ¿Quién dedica más tiempo y tiene más responsabilidades en las tareas del hogar (aseo y alimentación, organización de la casa, mantención, cuidado hijos(as), cuidado de mascotas, etc.)?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Yo"
+      },
+      {
+        "etiqueta": "Mi esposo o pareja hombre"
+      },
+      {
+        "etiqueta": "Mi esposa o pareja mujer"
+      },
+      {
+        "etiqueta": "Otra mujer de la familia"
+      },
+      {
+        "etiqueta": "Otro hombre de la familia"
+      },
+      {
+        "etiqueta": "Todas las personas adultas del hogar tenemos la misma dedicación de tiempo y responsabilidades (cantidad de horas y número de tareas)"
+      },
+      {
+        "etiqueta": "Una persona contratada"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P15w",
+    "texto": "¿A qué se debe esta dinámica familiar? Seleccione la razón principal de que sea usted la persona responsable de las tareas del hogar",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Los(as) demás adultos(as) y/o mis hijos(as) colaboran en las labores domésticas, pero yo soy la persona que dedica mayor parte del tiempo a ellas"
+      },
+      {
+        "etiqueta": "El resto de los(as) adultos(as) en el hogar por razones laborales no pueden asumir mayores responsabilidades (sistema de turnos, viajes laborales extendidos, etc.)"
+      },
+      {
+        "etiqueta": "Las otras personas no pueden realizarlas por razones de salud, discapacidad, enfermedad y/o edad"
+      },
+      {
+        "etiqueta": "Hay resistencia de mis hijos(as) y/o adultos(as) en hogar en asumir responsabilidades en las tareas del hogar, porque se asume que la responsabilidad la tengo yo"
+      },
+      {
+        "etiqueta": "Soy la persona más apta para realizar las tareas del hogar"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P16w",
+    "texto": "Durante la semana laboral ¿Cuántas horas al día dedica a las tareas domésticas y/o al cuidado de hijos/as y/o de personas dependientes?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas 0 horas al día"
+      },
+      {
+        "etiqueta": "1 hora al día"
+      },
+      {
+        "etiqueta": "2 horas al día"
+      },
+      {
+        "etiqueta": "3 horas al día"
+      },
+      {
+        "etiqueta": "4 horas al día"
+      },
+      {
+        "etiqueta": "5 horas al día"
+      },
+      {
+        "etiqueta": "6 horas al día"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P17w",
+    "texto": "¿Qué tan de acuerdo o en desacuerdo está con las siguientes afirmaciones?",
+    "tipo": "matriz_likert5",
+    "opciones": [],
+    "items": [
+      "Las mujeres, a diferencia de los hombres, deberían priorizar su rol de crianza y cuidado ante las oportunidades de desarrollo, mejor sueldo y ascenso a puestos de liderazgo y decisión.",
+      "Los hombres, por su responsabilidad de proveedores y principales sostenedores de la familia, necesitan mayores oportunidades de empleo y desarrollo económico.",
+      "Existen aspectos biológicos que determinan diferentes capacidades en hombres y mujeres para estudiar una carrera y/o ejercer un trabajo.",
+      "Los cargos en los que se requiere viajar permanentemente y/o trabajar en turnos fuera de casa son más adecuados para los hombres.",
+      "Hay cargos y/o rubros en los que las mujeres tienen un desempeño menor que sus pares hombres.",
+      "Los cargos de Dirección y Jefatura, donde se deben tomar decisiones rápidas, importantes y con riesgos importantes para la organización, en general son mejor manejados por los hombres.",
+      "Las mujeres por el hecho de ser mujer mejoran el orden y el ambiente laboral en la Dirección de Servicio."
+    ]
+  },
+  {
+    "codigo": "P18w",
+    "texto": "¿Qué tan de acuerdo o en desacuerdo está con las siguientes aseveraciones?",
+    "tipo": "matriz_likert5",
+    "opciones": [],
+    "items": [
+      "Hombres y mujeres tienen las mismas oportunidades para ascender dentro de la Dirección de Servicio u ocupar puestos de responsabilidad y de toma de decisión.",
+      "En la Dirección de Servicio se brindan espacios y oportunidades para que se visibilice el talento, capacidades y competencias tanto en hombres como mujeres.",
+      "Existe igualdad de oportunidades para que hombres y mujeres sean contratados(as) para trabajar en todas las áreas y cargos dentro de la Dirección de Servicio.",
+      "Los programas de capacitación y/o formación (nuevas tecnologías, mentorías o liderazgos) están disponibles en igualdad de condiciones para hombres y mujeres.",
+      "A un mismo nivel de responsabilidad, funciones y desempeño, hombres y mujeres reciben el mismo sueldo en la Dirección de Servicio."
+    ]
+  },
+  {
+    "codigo": "P19w",
+    "texto": "¿Qué tan de acuerdo o en desacuerdo está usted con las siguientes aseveraciones?",
+    "tipo": "matriz_likert5",
+    "opciones": [],
+    "items": [
+      "En la Dirección de Servicio se promueve y se toman las medidas pertinentes para garantizar un trato igualitario, respetuoso y espacios laborales seguros.",
+      "Los mecanismos para el tratamiento de los casos de acoso laboral, acoso sexual y discriminación son difundidos y comunicados a los(as) funcionarios(as).",
+      "Confío que los mecanismos para la denuncia y el tratamiento de casos de acoso laboral, sexual o discriminación son seguros y confidenciales.",
+      "Si viviera una situación de violencia intrafamiliar tengo confianza que puedo acercarme a la Dirección de Servicio para pedir contención, orientación y apoyo."
+    ]
+  },
+  {
+    "codigo": "P20w",
+    "texto": "En los últimos 2 años ¿Se ha sentido discriminado(a) en la Dirección de Servicio?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Sí"
+      },
+      {
+        "etiqueta": "No"
+      },
+      {
+        "etiqueta": "No estoy seguro(a)"
+      },
+      {
+        "etiqueta": "No estoy seguro(a) (especifique la situación)"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P21w",
+    "texto": "En los últimos 2 años ¿Por parte de quién se ha sentido discriminado(a)? (Marcar todas las que correspondan)",
+    "tipo": "multiple",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Equipos de Dirección"
+      },
+      {
+        "etiqueta": "Jefatura o Supervisor(a) directo(a)"
+      },
+      {
+        "etiqueta": "Personas a su cargo"
+      },
+      {
+        "etiqueta": "Par(es)"
+      },
+      {
+        "etiqueta": "Personal de empresas externas/contratistas"
+      },
+      {
+        "etiqueta": "Usuarios (as)"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P22w",
+    "texto": "En los últimos 2 años ¿Por cuál(es) de los siguientes motivos se ha sentido discriminado(a)? (Marque máximo 3 alternativas)",
+    "tipo": "multiple",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Ser mujer"
+      },
+      {
+        "etiqueta": "Ser hombre"
+      },
+      {
+        "etiqueta": "Orientación sexual"
+      },
+      {
+        "etiqueta": "Identidad de género"
+      },
+      {
+        "etiqueta": "Ser madre"
+      },
+      {
+        "etiqueta": "Ser padre"
+      },
+      {
+        "etiqueta": "Origen étnico, pueblo originario, rasgos o color de piel"
+      },
+      {
+        "etiqueta": "Nacionalidad o estado migratorio"
+      },
+      {
+        "etiqueta": "Lugar donde vivo"
+      },
+      {
+        "etiqueta": "Nivel socioeconómico"
+      },
+      {
+        "etiqueta": "Nivel educacional"
+      },
+      {
+        "etiqueta": "Estado civil y/o composición familiar"
+      },
+      {
+        "etiqueta": "Edad"
+      },
+      {
+        "etiqueta": "Religión o creencia"
+      },
+      {
+        "etiqueta": "Militancia o simpatía política"
+      },
+      {
+        "etiqueta": "Estado físico o de salud"
+      },
+      {
+        "etiqueta": "Características de la apariencia / presencia"
+      },
+      {
+        "etiqueta": "Sindicalización"
+      },
+      {
+        "etiqueta": "Tipo de contrato, jornada o situación laboral"
+      },
+      {
+        "etiqueta": "Situación de discapacidad"
+      },
+      {
+        "etiqueta": "Profesión/ Universidad"
+      },
+      {
+        "etiqueta": "Ciudad o comuna de nacimiento"
+      },
+      {
+        "etiqueta": "Otro (especifique) ¿Cuál?"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P23w",
+    "texto": "En los últimos 2 años ¿Se ha sentido acosado(a) laboralmente en la Dirección de Servicio?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Sí"
+      },
+      {
+        "etiqueta": "No"
+      },
+      {
+        "etiqueta": "No estoy seguro(a)"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P24w",
+    "texto": "En los últimos 2 años ¿Por parte de quién se ha sentido acosado(a) laboralmente?(Marcar todas las que correspondan)",
+    "tipo": "multiple",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Equipos de Dirección"
+      },
+      {
+        "etiqueta": "Jefatura o Supervisor(a) directo(a)"
+      },
+      {
+        "etiqueta": "Personas a su cargo"
+      },
+      {
+        "etiqueta": "Par(es)"
+      },
+      {
+        "etiqueta": "Personal de empresas externas/contratistas"
+      },
+      {
+        "etiqueta": "Usuarios (as)"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P25w",
+    "texto": "En los últimos 2 años ¿Se ha sentido acosado(a) sexualmente en la Dirección de Servicio?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Sí"
+      },
+      {
+        "etiqueta": "No"
+      },
+      {
+        "etiqueta": "No estoy seguro(a)"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P26w",
+    "texto": "En los últimos 2 años ¿Por parte de quién se ha sentido acosado(a) sexualmente? (Marcar todas las que correspondan)",
+    "tipo": "multiple",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Equipos de Dirección"
+      },
+      {
+        "etiqueta": "Jefatura o Supervisor(a) directo(a)"
+      },
+      {
+        "etiqueta": "Personas a su cargo"
+      },
+      {
+        "etiqueta": "Par(es)"
+      },
+      {
+        "etiqueta": "Personal de empresas externas/contratistas"
+      },
+      {
+        "etiqueta": "Usuarios (as)"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P27w",
+    "texto": "En los últimos 2 años ¿Ha vivido o ha sido testigo de alguna de estas situaciones en la Dirección de Servicio ?(Marcar todas las que correspondan)",
+    "tipo": "multiple",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas No he experimentado ninguna de estas situaciones ni he sido testigo de ellas"
+      },
+      {
+        "etiqueta": "Exhibición de material de carácter sexista o sexualmente explícito en lugares de trabajo"
+      },
+      {
+        "etiqueta": "Comentarios o chistes de connotación sexual que resultan ofensivos o incómodos"
+      },
+      {
+        "etiqueta": "Invitaciones, gestos, acercamientos, tocaciones o caricias de connotación sexual"
+      },
+      {
+        "etiqueta": "Gritos, insultos, aislamiento, amenazas o ridiculización, de manera privada o frente a otras personas, por parte de colegas y/o jefaturas"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P28w",
+    "texto": "¿Qué tan de acuerdo o desacuerdo estás con las siguientes aseveraciones respecto a la Dirección de Servicio?",
+    "tipo": "matriz_likert5",
+    "opciones": [],
+    "items": [
+      "La Dirección de Servicio tiene disponible medidas (de conciliación) que me permiten equilibrar las responsabilidades que tengo en el trabajo con las familiares, de cuidado y mi desarrollo personal y descanso.",
+      "Las jefaturas ejercen un liderazgo que promueve y otorga facilidades para que yo pueda conciliar mi vida laboral, personal y familiar.",
+      "Al finalizar mi horario laboral y en los días que tengo libre me desconecto del trabajo y no tengo llamadas ni mensajes que interrumpan mi descanso y mis actividades personales.",
+      "La Dirección de Servicio promueve la corresponsabilidad, es decir, que tanto mujeres como hombres asuman de manera equilibrada su responsabilidad y se hagan cargo de las tareas domésticas y de cuidado de hijos/as y personas dependientes."
+    ]
+  },
+  {
+    "codigo": "P29w",
+    "texto": "Indique aquellas medidas de conciliación disponibles en la Dirección de Servicio a las cuales usted haya dado uso durante el último año.(Marcar todas las que correspondan)",
+    "tipo": "multiple",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas No conozco las medidas de conciliación disponibles en la Dirección de Servicio"
+      },
+      {
+        "etiqueta": "Flexibilidad horaria"
+      },
+      {
+        "etiqueta": "Jardín Infantil"
+      },
+      {
+        "etiqueta": "Centro escolar"
+      },
+      {
+        "etiqueta": "Dispositivos de Salud"
+      },
+      {
+        "etiqueta": "Actividades extraprogramáticas"
+      },
+      {
+        "etiqueta": "Tarjeta de EDENRED"
+      },
+      {
+        "etiqueta": "Sala de amamantamiento / sala de lactancia"
+      },
+      {
+        "etiqueta": "No he utilizado ninguna de estas medidas de conciliación en el último año"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P30w",
+    "texto": "En el último año ¿Se ha realizado algún tipo de examen/chequeo? Por favor, responda por cada uno de los exámenes. (Si no aplica para su caso, responda no)",
+    "tipo": "matriz_dicotomica",
+    "opciones": [],
+    "items": [
+      "Papanicolau (Examen para detectar Cáncer uterino)",
+      "Mamografía (Examen para detectar Cáncer de Mama)",
+      "Examen clínico de próstata (tacto rectal) o Antígeno prostático (exámenes para detectar cáncer prostático)"
+    ]
+  },
+  {
+    "codigo": "P31w",
+    "texto": "¿Realiza actividad física regularmente?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Sí"
+      },
+      {
+        "etiqueta": "No"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P32w",
+    "texto": "¿Tiene una alimentación saludable y balanceada?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Sí"
+      },
+      {
+        "etiqueta": "No"
+      },
+      {
+        "etiqueta": "No estoy seguro(a)"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P33w",
+    "texto": "¿Considera que mantiene un consumo responsable de alcohol?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Sí"
+      },
+      {
+        "etiqueta": "No"
+      },
+      {
+        "etiqueta": "No estoy seguro(a)"
+      },
+      {
+        "etiqueta": "No consumo"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P34w",
+    "texto": "¿Fuma tabaco?",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Sí"
+      },
+      {
+        "etiqueta": "No"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P35w",
+    "texto": "¿Ha sentido algún malestar anímico en los últimos meses? (por ejemplo: agotamiento, irritabilidad, insomnio, ansiedad desánimo, desmotivación, estrés, entre otros)",
+    "tipo": "unica",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Sí"
+      },
+      {
+        "etiqueta": "No"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P36w",
+    "texto": "Respecto a su salud mental:¿Cuál(es) de estos malestares anímicos ha sentido en los últimos meses?(Marcar todas las que correspondan)",
+    "tipo": "multiple",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Agotamiento excesivo"
+      },
+      {
+        "etiqueta": "Irritabilidad"
+      },
+      {
+        "etiqueta": "Insomnio"
+      },
+      {
+        "etiqueta": "Ansiedad"
+      },
+      {
+        "etiqueta": "Desánimo"
+      },
+      {
+        "etiqueta": "Desmotivación"
+      },
+      {
+        "etiqueta": "Estrés"
+      },
+      {
+        "etiqueta": "Otro. ¿Cuál?"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P37w",
+    "texto": "¿Con qué cree que está relacionado el malestar anímico?(Marcar todas las que correspondan)",
+    "tipo": "multiple",
+    "opciones": [
+      {
+        "etiqueta": "Respuestas Falta de corresponsabilidad en el hogar (dificultad para conciliar el trabajo con tareas domésticas y/o crianza)"
+      },
+      {
+        "etiqueta": "A aspectos laborales (Exceso de trabajo, distancia, turnos, desconexión etc.)"
+      },
+      {
+        "etiqueta": "Al ambiente laboral (situaciones de acosos, u otros)"
+      },
+      {
+        "etiqueta": "A problemas familiares y/o personales"
+      },
+      {
+        "etiqueta": "A problemas económicos"
+      },
+      {
+        "etiqueta": "Otro. ¿cuál?"
+      }
+    ],
+    "items": []
+  },
+  {
+    "codigo": "P38w",
+    "texto": "¿Qué tan de acuerdo o en desacuerdo está con las siguientes aseveraciones respecto a la Dirección de Servicio?",
+    "tipo": "matriz_likert5",
+    "opciones": [],
+    "items": [
+      "La infraestructura (espacio, mobiliario, equipamiento, calidad y mantención) permite el desempeño adecuado de las labores para hombres y mujeres.",
+      "Los espacios laborales son visibles, iluminados u otras condiciones que aporten a disuadir situaciones de acoso laboral y sexual.",
+      "Los uniformes, la ropa de trabajo y elementos de protección personal facilitados consideran las diferentes corporalidades, las necesidades biológicas de hombres y mujeres y permiten realizar el trabajo de manera cómoda y segura."
+    ]
+  },
+  {
+    "codigo": "P39w",
+    "texto": "¿Qué tan de acuerdo o desacuerdo está con las siguientes aseveraciones respecto a la Dirección de Servicio?",
+    "tipo": "matriz_likert5",
+    "opciones": [],
+    "items": [
+      "Tiene valor estratégico para la Dirección de Servicio posicionarse como líder en temáticas de inclusión, diversidad, equidad de género y conciliación.",
+      "La Máxima Autoridad de la Institución, los equipos de Dirección y las jefaturas, lideran la Dirección de Servicio de manera inclusiva y/o en coherencia con una política de diversidad, igualdad y conciliación.",
+      "Estoy comprometido(a) con las acciones que se definan para avanzar en la igualdad de género.",
+      "Estoy dispuesto(a) a cambiar algunas de mis conductas y/o dinámicas laborales con tal de avanzar en la igualdad de género, la inclusión y la diversidad (decisiones, actitudes, comentarios, chistes, entre otros).",
+      "Yo recomendaría a la Dirección de Servicio por lo que realiza en inclusión de la diversidad y equidad de género."
+    ]
+  }
+]
