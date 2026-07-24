@@ -1,0 +1,7 @@
+.streamlit/secrets.toml
+encuesta.db
+__pycache__/
+*.py[cod]
+.DS_Store
+.venv/
+
