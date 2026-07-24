@@ -49,6 +49,12 @@ html,body,[class*="css"]{font-family:Arial,Helvetica,sans-serif;color:var(--ink)
 .privacy{padding:15px 18px;border-left:4px solid var(--cyan);background:#e8f4f8;border-radius:5px;margin:18px 0;color:#24536a}
 .progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:18px 0 7px}.progress{height:8px;background:#dce8ed;border-radius:10px;overflow:hidden}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:10px}
 .question-card{padding:24px 26px;margin:12px 0 18px;border-top:3px solid var(--cyan)}.qnum{color:var(--blue);font-size:11px;font-weight:800;letter-spacing:.13em}.qtext{font-size:18px;font-weight:700;line-height:1.35;margin:7px 0 14px}
+div[data-testid="stElementContainer"]:has([data-testid="stSegmentedControl"]){background:#fff;border:1px solid #d5e1e8;border-radius:8px;padding:13px 15px 15px;margin:8px 0 18px}
+[data-testid="stSegmentedControl"] label{font-size:13px!important;font-weight:500!important;color:#17384d!important;margin-bottom:10px!important}
+[data-testid="stSegmentedControl"] div[role="radiogroup"]{display:flex!important;gap:0!important;width:min(315px,100%)!important}
+[data-testid="stSegmentedControl"] button{flex:1!important;min-width:125px!important;min-height:53px!important;border:1px solid #d2dee5!important;border-radius:4px!important;background:#f7f9fa!important;color:#18384a!important;box-shadow:none!important}
+[data-testid="stSegmentedControl"] button[aria-pressed="true"]{background:#e6f3f8!important;border:2px solid #0d87b4!important;color:#075f91!important;font-weight:800!important}
+[data-testid="stSegmentedControl"] button:hover{border-color:#1992bc!important;background:#edf7fa!important}
 .receipt{background:#fff;border:1px solid var(--line);border-radius:14px;padding:45px;text-align:center;max-width:750px;margin:50px auto;box-shadow:0 18px 45px rgba(8,59,92,.12)}
 .check{width:60px;height:60px;border-radius:50%;background:var(--green);color:white;font-size:34px;line-height:60px;margin:auto}.code{border:1px dashed #7fa7b8;background:#f4f9fb;color:var(--blue);font-family:monospace;font-size:20px;font-weight:800;padding:20px;margin:25px 0}
 .admin-title{display:flex;justify-content:space-between;align-items:flex-end;margin:8px 0 20px}.admin-title h1{margin:0;font-size:38px}.online{background:#edf8f3;color:#137653;border:1px solid #aedbc8;border-radius:30px;padding:8px 13px;font-size:12px;font-weight:700}
@@ -187,7 +193,13 @@ def public_survey():
             else:
                 matrix = {}
                 for item in question.get("items", []):
-                    matrix[item] = st.radio(item, ["— Seleccione —", *options], horizontal=True, key=f"ans-{code}-{hashlib.md5(item.encode()).hexdigest()}")
+                    matrix[item] = st.segmented_control(
+                        item,
+                        options,
+                        default=None,
+                        selection_mode="single",
+                        key=f"ans-{code}-{hashlib.md5(item.encode()).hexdigest()}",
+                    )
                 section_answers[code] = matrix
             st.markdown("</div>", unsafe_allow_html=True)
         prev, nxt = st.columns([1, 2])
@@ -202,7 +214,7 @@ def public_survey():
         missing = []
         for q in current:
             value = section_answers.get(q["codigo"])
-            valid = all(v != "— Seleccione —" for v in value.values()) if isinstance(value, dict) else bool(value and value != "— Seleccione —")
+            valid = all(v is not None and v != "— Seleccione —" for v in value.values()) if isinstance(value, dict) else bool(value and value != "— Seleccione —")
             if not valid:
                 missing.append(q["codigo"])
         if missing:
