@@ -11,11 +11,14 @@ import {
   LockKeyhole,
   LogOut,
   Plus,
+  Pencil,
+  Upload,
   Send,
   Settings2,
   UsersRound,
 } from "lucide-react";
 import { INSTITUTION_CONFIG as institution } from "@/config/institution";
+import type { SurveySection } from "@/config/survey";
 
 type Survey = {
   id: string;
@@ -23,6 +26,8 @@ type Survey = {
   description: string;
   status: string;
   createdAt: string;
+  units: string[];
+  sections: SurveySection[];
 };
 type ResponseRow = {
   id: string;
@@ -246,11 +251,132 @@ function NewSurvey({ close, saved }: { close: () => void; saved: () => void }) {
   );
 }
 
+function EditSurvey({
+  survey,
+  close,
+  saved,
+}: {
+  survey: Survey;
+  close: () => void;
+  saved: () => void;
+}) {
+  const [title, setTitle] = useState(survey.title),
+    [description, setDescription] = useState(survey.description),
+    [sections, setSections] = useState<SurveySection[]>(
+      structuredClone(survey.sections),
+    ),
+    [error, setError] = useState("");
+  const save = async () => {
+    const r = await fetch("/api/admin/surveys", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: survey.id,
+        title,
+        description,
+        sections,
+        units: survey.units,
+      }),
+    });
+    if (!r.ok) {
+      const b = await r.json();
+      return setError(b.error || "No fue posible guardar los cambios");
+    }
+    saved();
+  };
+  return (
+    <div className="modal-backdrop">
+      <section className="builder-modal">
+        <header>
+          <div>
+            <span className="mini-label">Edición de plantilla</span>
+            <h2>Modificar encuesta</h2>
+          </div>
+          <button className="icon-button" onClick={close}>
+            ×
+          </button>
+        </header>
+        <div className="builder-body">
+          <label>
+            Título de la encuesta
+            <input value={title} onChange={(e) => setTitle(e.target.value)} />
+          </label>
+          <label>
+            Descripción
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </label>
+          {sections.map((section, si) => (
+            <div className="builder-section" key={section.id}>
+              <label>
+                Sección {si + 1}
+                <input
+                  value={section.title}
+                  onChange={(e) =>
+                    setSections((current) =>
+                      current.map((s, i) =>
+                        i === si ? { ...s, title: e.target.value } : s,
+                      ),
+                    )
+                  }
+                />
+              </label>
+              {section.questions.map((question, qi) => (
+                <div className="builder-question" key={question.id}>
+                  <span>{qi + 1}</span>
+                  <input
+                    value={question.title}
+                    onChange={(e) =>
+                      setSections((current) =>
+                        current.map((s, i) =>
+                          i === si
+                            ? {
+                                ...s,
+                                questions: s.questions.map((q, n) =>
+                                  n === qi
+                                    ? { ...q, title: e.target.value }
+                                    : q,
+                                ),
+                              }
+                            : s,
+                        ),
+                      )
+                    }
+                  />
+                  <select value={question.type} disabled>
+                    <option value="single">Selección única</option>
+                    <option value="multiple">Selección múltiple</option>
+                    <option value="dichotomous">Sí / No</option>
+                    <option value="likert">Escala Likert</option>
+                    <option value="text">Texto libre</option>
+                  </select>
+                </div>
+              ))}
+            </div>
+          ))}
+          {error && <div className="admin-error">{error}</div>}
+        </div>
+        <footer>
+          <button className="ghost-button" onClick={close}>
+            Cancelar
+          </button>
+          <button className="solid-button" onClick={save}>
+            <Pencil size={17} /> Guardar cambios
+          </button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
 export function AdminPortal({ authenticated }: { authenticated: boolean }) {
   const [logged, setLogged] = useState(authenticated),
     [data, setData] = useState<Overview | null>(null),
     [view, setView] = useState("resumen"),
     [creating, setCreating] = useState(false),
+    [editing, setEditing] = useState<Survey | null>(null),
     [error, setError] = useState("");
   const load = async () => {
     const r = await fetch("/api/admin/overview");
@@ -273,6 +399,16 @@ export function AdminPortal({ authenticated }: { authenticated: boolean }) {
       body: JSON.stringify({ id, status }),
     });
     load();
+  };
+  const importBaseSurvey = async () => {
+    setError("");
+    const r = await fetch("/api/admin/surveys/template", { method: "POST" });
+    if (!r.ok) {
+      const body = await r.json();
+      return setError(body.error || "No fue posible cargar la encuesta base.");
+    }
+    await load();
+    setView("encuestas");
   };
   const exportCsv = () => {
     if (!data) return;
@@ -354,9 +490,14 @@ export function AdminPortal({ authenticated }: { authenticated: boolean }) {
                   : "Resultados e informes"}
             </h1>
           </div>
-          <button className="solid-button" onClick={() => setCreating(true)}>
-            <Plus /> Nueva encuesta
-          </button>
+          <div className="admin-top-actions">
+            <button className="ghost-button" onClick={importBaseSurvey}>
+              <Upload /> Cargar encuesta base
+            </button>
+            <button className="solid-button" onClick={() => setCreating(true)}>
+              <Plus /> Nueva encuesta
+            </button>
+          </div>
         </header>
         {error && <div className="admin-error">{error}</div>}
         {view === "resumen" && (
@@ -469,7 +610,10 @@ export function AdminPortal({ authenticated }: { authenticated: boolean }) {
                   {statusLabel[s.status]}
                 </span>
                 <span>{new Date(s.createdAt).toLocaleDateString("es-CL")}</span>
-                <div>
+                <div className="survey-actions">
+                  <button onClick={() => setEditing(s)}>
+                    <Pencil /> Editar
+                  </button>
                   {s.status !== "published" ? (
                     <button onClick={() => publish(s.id, "published")}>
                       <Send /> Publicar
@@ -523,6 +667,16 @@ export function AdminPortal({ authenticated }: { authenticated: boolean }) {
             setCreating(false);
             load();
             setView("encuestas");
+          }}
+        />
+      )}
+      {editing && (
+        <EditSurvey
+          survey={editing}
+          close={() => setEditing(null)}
+          saved={() => {
+            setEditing(null);
+            load();
           }}
         />
       )}
