@@ -10,10 +10,11 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { INSTITUTION_CONFIG as institution } from "@/config/institution";
+import { BASE_SURVEY_SECTIONS } from "@/config/base-survey";
 import {
   LIKERT_OPTIONS,
-  SURVEY_SECTIONS,
   type Question,
+  type SurveySection,
 } from "@/config/survey";
 type Answers = Record<string, string | string[] | Record<string, string>>;
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -184,10 +185,10 @@ export function SurveyApp({
     id: string;
     title: string;
     description: string;
-    sections: typeof SURVEY_SECTIONS;
+    sections: SurveySection[];
   };
 }) {
-  const sections = survey?.sections ?? SURVEY_SECTIONS;
+  const sections = survey?.sections ?? BASE_SURVEY_SECTIONS;
   const [step, setStep] = useState(0),
     [code, setCode] = useState(""),
     [unit, setUnit] = useState(""),
