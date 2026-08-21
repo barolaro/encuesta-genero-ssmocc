@@ -592,7 +592,7 @@
 .identity-brand-card img { display: block; width: 100%; height: 86px; margin: 0 auto; object-fit: contain; object-position: center; }
 .identity-brand-card small { width: 100%; overflow: hidden; color: #66758a; font-size: .61rem; font-weight: 850; letter-spacing: .06em; text-align: center; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
 .network-brand-card img { width: 145px; }
-.hospital-brand-card img { width: 86px; }
+.hospital-brand-card img { width: 100%; max-width: 158px; object-position: center; }
 .identity-plus { flex: 0 0 auto; color: #fff; font-size: 1.7rem; font-weight: 500; line-height: 1; }
 .identity-field { display: grid; gap: 8px; margin-top: 18px; color: #243952; font-size: .8rem; font-weight: 850; }
 .identity-field small { color: #7d8b9d; font-weight: 600; }
@@ -748,7 +748,7 @@
   .identity-brand-card { width: min(40vw, 150px); height: 112px; grid-template-rows: 75px 16px; padding-inline: 8px; }
   .identity-brand-card img { height: 75px; }
   .network-brand-card img { width: 120px; }
-  .hospital-brand-card img { width: 75px; }
+  .hospital-brand-card img { width: 100%; max-width: 125px; }
   .admin-top-actions {
     align-items: stretch;
     flex-direction: column;

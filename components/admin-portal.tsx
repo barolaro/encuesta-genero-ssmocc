@@ -847,6 +847,7 @@ export function AdminPortal({
                         ...current,
                         institutionName: selected.name,
                         shortName: selected.shortName,
+                        logoUrl: selected.logoUrl,
                       }));
                   }}
                 >
@@ -861,7 +862,7 @@ export function AdminPortal({
               </label>
               <label className="logo-upload">
                 <ImagePlus />
-                <span><strong>Subir o reemplazar logo</strong><small>PNG, JPG o WEBP · máximo 750 KB</small></span>
+                <span><strong>Usar un logo personalizado</strong><small>El logo oficial cambia automáticamente · PNG, JPG o WEBP · máximo 750 KB</small></span>
                 <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectLogo(event.target.files?.[0])} />
               </label>
               <label className="identity-field">
@@ -879,7 +880,7 @@ export function AdminPortal({
               <p>El sello del SSMOCC permanece fijo. Solo se pueden seleccionar establecimientos pertenecientes a su red asistencial.</p>
               <ol>
                 <li>Selecciona un establecimiento de la Red SSMOCC.</li>
-                <li>Sube su logo institucional.</li>
+                <li>El nombre, la sigla y el logo se cargarán automáticamente.</li>
                 <li>Actualiza las unidades participantes.</li>
                 <li>Guarda y revisa la encuesta pública.</li>
               </ol>
