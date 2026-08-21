@@ -2,10 +2,12 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
+  AlertTriangle,
   BarChart3,
   CheckCircle2,
   ClipboardList,
   Download,
+  FileSpreadsheet,
   FilePlus2,
   LayoutDashboard,
   LockKeyhole,
@@ -19,6 +21,7 @@ import {
 } from "lucide-react";
 import { INSTITUTION_CONFIG as institution } from "@/config/institution";
 import type { SurveySection } from "@/config/survey";
+import type { SurveyAnalysis } from "@/lib/survey-analysis";
 
 type Survey = {
   id: string;
@@ -42,6 +45,7 @@ type Overview = {
   metrics: { total: number; surveys: number; active: number; units: number };
   byUnit: Record<string, number>;
   byDay: Record<string, number>;
+  analysis: SurveyAnalysis;
 };
 const statusLabel: Record<string, string> = {
   draft: "Borrador",
@@ -433,6 +437,9 @@ export function AdminPortal({ authenticated }: { authenticated: boolean }) {
     a.download = "resultados_encuesta.csv";
     a.click();
   };
+  const exportExcel = () => {
+    window.location.href = "/api/admin/reports/excel";
+  };
   if (!logged) return <Login done={() => setLogged(true)} />;
   return (
     <div className="admin-shell">
@@ -632,18 +639,112 @@ export function AdminPortal({ authenticated }: { authenticated: boolean }) {
           <>
             <section className="report-hero">
               <div>
-                <span className="mini-label">Informe consolidado</span>
-                <h2>Resultados de participación</h2>
+                <span className="mini-label">Informe institucional NCh3262</span>
+                <h2>Análisis integral de género y equidad</h2>
                 <p>
-                  Descarga los datos anonimizados para análisis institucional.
-                  El archivo no contiene nombres, correos ni RUT.
+                  Indicadores de percepción, brechas, alertas y resultados por
+                  unidad, con resguardo automático del anonimato.
                 </p>
               </div>
-              <button className="solid-button" onClick={exportCsv}>
-                <Download /> Descargar CSV
-              </button>
+              <div className="report-actions">
+                <button className="ghost-button" onClick={exportCsv}>
+                  <Download /> Base CSV
+                </button>
+                <button className="solid-button" onClick={exportExcel}>
+                  <FileSpreadsheet /> Informe Excel
+                </button>
+              </div>
+            </section>
+            <section className="analysis-kpis">
+              <article>
+                <small>Índice global favorable</small>
+                <strong>{data?.analysis.overallScore == null ? "—" : `${data.analysis.overallScore}%`}</strong>
+                <p>Promedio ajustado de indicadores calculables</p>
+              </article>
+              <article className="positive">
+                <small>Fortalezas</small>
+                <strong>{data?.analysis.summary.positive || 0}</strong>
+                <p>Indicadores en nivel positivo</p>
+              </article>
+              <article className="warning">
+                <small>Atención</small>
+                <strong>{data?.analysis.summary.intermediate || 0}</strong>
+                <p>Indicadores en nivel intermedio</p>
+              </article>
+              <article className="critical">
+                <small>Prioridades</small>
+                <strong>{data?.analysis.summary.critical || 0}</strong>
+                <p>Indicadores que requieren intervención</p>
+              </article>
+            </section>
+            <section className="analysis-grid">
+              <article className="panel-card">
+                <header>
+                  <div>
+                    <span className="mini-label">Panorama institucional</span>
+                    <h2>Resultados por dimensión</h2>
+                  </div>
+                  <BarChart3 />
+                </header>
+                <div className="dimension-list">
+                  {data?.analysis.dimensions.map((item) => (
+                    <div key={item.dimension}>
+                      <div><span>{item.dimension}</span><strong>{item.score}%</strong></div>
+                      <i><b className={item.score >= 70 ? "good" : item.score >= 50 ? "medium" : "bad"} style={{ width: `${item.score}%` }} /></i>
+                    </div>
+                  ))}
+                  {!data?.analysis.dimensions.length && <p className="empty-state">Los indicadores aparecerán al alcanzar 5 respuestas válidas.</p>}
+                </div>
+              </article>
+              <article className="panel-card alert-panel">
+                <header>
+                  <div>
+                    <span className="mini-label">Señales sensibles</span>
+                    <h2>Experiencias declaradas</h2>
+                  </div>
+                  <AlertTriangle />
+                </header>
+                {data && Object.entries({
+                  "Discriminación": data.analysis.alerts.discrimination,
+                  "Acoso laboral": data.analysis.alerts.workplaceHarassment,
+                  "Acoso sexual": data.analysis.alerts.sexualHarassment,
+                  "Malestar anímico": data.analysis.alerts.emotionalDistress,
+                }).map(([label, item]) => (
+                  <div className="alert-row" key={label}>
+                    <span>{label}<small>Base: {item.base}</small></span>
+                    <strong>{item.value == null ? "—" : `${item.value}%`}</strong>
+                  </div>
+                ))}
+                <p className="privacy-note">Resultados agregados. Nunca se muestran cruces con menos de 5 respuestas.</p>
+              </article>
+            </section>
+            <section className="panel-card indicator-panel">
+              <header>
+                <div>
+                  <span className="mini-label">Matriz de resultados</span>
+                  <h2>Indicadores de equidad y percepción</h2>
+                </div>
+              </header>
+              <div className="indicator-head">
+                <span>Código e indicador</span><span>Dimensión</span><span>Base</span><span>Resultado</span><span>Estado</span>
+              </div>
+              {data?.analysis.indicators.map((item) => (
+                <div className="indicator-row" key={item.code}>
+                  <div><code>{item.code}</code><strong>{item.name}</strong></div>
+                  <span>{item.dimension}</span>
+                  <span>{item.base}</span>
+                  <strong>{item.value == null ? "Protegido" : `${item.value}%`}</strong>
+                  <span className={`analysis-status ${item.status.toLowerCase().replace("í", "i").replace(" ", "-")}`}>{item.status}</span>
+                </div>
+              ))}
             </section>
             <section className="panel-card">
+              <header>
+                <div>
+                  <span className="mini-label">Trazabilidad anonimizada</span>
+                  <h2>Participaciones registradas</h2>
+                </div>
+              </header>
               <div className="table-head results">
                 <span>Código</span>
                 <span>Unidad</span>
