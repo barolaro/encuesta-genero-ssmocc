@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./admin.css";
 import { INSTITUTION_CONFIG } from "@/config/institution";
 
 export const metadata: Metadata = {

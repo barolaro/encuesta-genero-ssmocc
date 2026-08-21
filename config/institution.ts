@@ -4,7 +4,7 @@ export const INSTITUTION_CONFIG = {
   subHeader: "Ministerio de Salud · Gobierno de Chile",
   surveyTitle: "Encuesta Comunidad Funcionaria 2026",
   surveyDescription: "Tu experiencia contribuye a construir espacios laborales más respetuosos, seguros e inclusivos.",
-  logoUrl: "/ssmocc-logo.svg",
+  logoUrl: "/logo-ssmocc-oficial.png",
   colors: {
     primaryBlue: "#0039A6",
     primaryRed: "#EF3340",
