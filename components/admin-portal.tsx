@@ -826,9 +826,15 @@ export function AdminPortal({
                 <Settings2 />
               </header>
               <div className="identity-preview">
-                <img src={institution.networkLogoUrl} alt={institution.networkShortName} />
-                <span>+</span>
-                <div><img src={identityDraft.logoUrl} alt="Vista previa del logo" /></div>
+                <div className="identity-brand-card network-brand-card">
+                  <img src={institution.networkLogoUrl} alt={institution.networkShortName} />
+                  <small>Servicio de Salud</small>
+                </div>
+                <span className="identity-plus" aria-hidden="true">+</span>
+                <div className="identity-brand-card hospital-brand-card">
+                  <img src={identityDraft.logoUrl} alt="Vista previa del logo" />
+                  <small>{identityDraft.shortName || "Establecimiento"}</small>
+                </div>
               </div>
               <label className="identity-field">
                 Nombre del hospital o establecimiento
