@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ClipboardList,
   Download,
+  FileText,
   FileSpreadsheet,
   FilePlus2,
   ImagePlus,
@@ -482,6 +483,9 @@ export function AdminPortal({
   const exportExcel = () => {
     window.location.href = "/api/admin/reports/excel";
   };
+  const exportPdf = () => {
+    window.location.href = "/api/admin/reports/pdf";
+  };
   if (!logged) return <Login institution={institution} done={() => setLogged(true)} />;
   return (
     <div className="admin-shell">
@@ -706,7 +710,10 @@ export function AdminPortal({
                   <Download /> Base CSV
                 </button>
                 <button className="solid-button" onClick={exportExcel}>
-                  <FileSpreadsheet /> Informe Excel
+                  <FileSpreadsheet /> Excel técnico completo
+                </button>
+                <button className="solid-button report-pdf-button" onClick={exportPdf}>
+                  <FileText /> Informe gerencial PDF
                 </button>
               </div>
             </section>

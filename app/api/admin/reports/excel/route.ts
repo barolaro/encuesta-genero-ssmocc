@@ -2,11 +2,13 @@ import ExcelJS from "exceljs";
 import { desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { BASE_SURVEY_SECTIONS } from "@/config/base-survey";
+import type { Question } from "@/config/survey";
 import { getDb } from "@/db";
 import { surveyResponses } from "@/db/schema";
 import { isAdmin } from "@/lib/admin-auth";
 import { analyzeSurvey } from "@/lib/survey-analysis";
 import { getInstitutionSettings } from "@/lib/institution-settings";
+import { ADMINISTRATIVE_INDICATORS, REPORT_THEMES } from "@/lib/report-catalog";
 
 export const runtime = "nodejs";
 
@@ -42,6 +44,81 @@ function safeValue(value: unknown) {
   return value == null ? "" : String(value);
 }
 
+type ResponseRow = typeof surveyResponses.$inferSelect;
+type DistributionRow = {
+  questionId: string;
+  question: string;
+  item: string;
+  answer: string;
+  count: number;
+  base: number;
+};
+
+function distributionRows(responses: ResponseRow[], questions: Question[]): DistributionRow[] {
+  return questions.flatMap((question) => {
+    const counts = new Map<string, Map<string, number>>();
+    for (const response of responses) {
+      const value = response.responses[question.id];
+      if (Array.isArray(value)) {
+        const item = "Selecciones";
+        const itemCounts = counts.get(item) || new Map<string, number>();
+        value.forEach((answer) => {
+          const clean = safeValue(answer).trim();
+          if (clean) itemCounts.set(clean, (itemCounts.get(clean) || 0) + 1);
+        });
+        counts.set(item, itemCounts);
+      } else if (value && typeof value === "object") {
+        Object.entries(value).forEach(([item, answer]) => {
+          const clean = safeValue(answer).trim();
+          if (!clean) return;
+          const itemCounts = counts.get(item) || new Map<string, number>();
+          itemCounts.set(clean, (itemCounts.get(clean) || 0) + 1);
+          counts.set(item, itemCounts);
+        });
+      } else {
+        const clean = safeValue(value).trim();
+        if (!clean) continue;
+        const item = question.type === "text" ? "Comentarios recibidos" : "Respuesta";
+        const answer = question.type === "text" ? "Con comentario" : clean;
+        const itemCounts = counts.get(item) || new Map<string, number>();
+        itemCounts.set(answer, (itemCounts.get(answer) || 0) + 1);
+        counts.set(item, itemCounts);
+      }
+    }
+    return [...counts.entries()].flatMap(([item, answers]) => {
+      const base = question.type === "multiple"
+        ? responses.filter((response) => Array.isArray(response.responses[question.id]) && (response.responses[question.id] as unknown[]).length > 0).length
+        : [...answers.values()].reduce((sum, count) => sum + count, 0);
+      return [...answers.entries()].map(([answer, count]) => ({
+        questionId: question.id,
+        question: question.title,
+        item,
+        answer,
+        count,
+        base,
+      }));
+    });
+  });
+}
+
+function addDistributionTable(sheet: ExcelJS.Worksheet, startRow: number, rows: DistributionRow[]) {
+  sheet.getRow(startRow).values = ["Pregunta", "Enunciado", "Ítem o afirmación", "Respuesta", "Frecuencia", "Porcentaje", "Base"];
+  styleHeader(sheet.getRow(startRow));
+  rows.forEach((item) => {
+    const row = sheet.addRow([
+      item.questionId,
+      item.question,
+      item.item,
+      item.answer,
+      item.count,
+      item.base ? item.count / item.base : "",
+      item.base,
+    ]);
+    if (item.base) row.getCell(6).numFmt = "0.0%";
+  });
+  sheet.autoFilter = { from: { row: startRow, column: 1 }, to: { row: startRow, column: 7 } };
+}
+
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const [responses, institution] = await Promise.all([
@@ -49,6 +126,8 @@ export async function GET() {
     getInstitutionSettings(),
   ]);
   const analysis = analyzeSurvey(responses);
+  const allQuestions = BASE_SURVEY_SECTIONS.flatMap((section) => section.questions);
+  const allDistributions = distributionRows(responses, allQuestions);
   const workbook = new ExcelJS.Workbook();
   workbook.creator = `${institution.institutionName} · ${institution.networkShortName}`;
   workbook.created = new Date();
@@ -90,6 +169,21 @@ export async function GET() {
   summary.getCell(summary.rowCount - 2, 1).alignment = { wrapText: true, vertical: "top" };
   summary.columns = [{ width: 48 }, { width: 24 }, { width: 16 }, { width: 16 }, { width: 16 }];
 
+  summary.addRow([]);
+  summary.addRow(["Lectura gerencial"]);
+  styleHeader(summary.lastRow!);
+  const weakest = analysis.dimensions.slice(0, 3);
+  if (analysis.responseCount < analysis.minimum)
+    summary.addRow(["La base todavía es insuficiente para emitir conclusiones institucionales."]);
+  else if (!weakest.length)
+    summary.addRow(["No existen indicadores calculables con las respuestas disponibles."]);
+  else
+    weakest.forEach((item, index) => summary.addRow([
+      `${index + 1}. Priorizar ${item.dimension}`,
+      item.score / 100,
+      "Revisar indicadores críticos y comentarios asociados",
+    ]).getCell(2).numFmt = "0.0%");
+
   const dimensions = workbook.addWorksheet("Dimensiones");
   title(dimensions, "Resultados por dimensión", 3);
   dimensions.addRow([]);
@@ -126,7 +220,79 @@ export async function GET() {
   });
   units.columns = [{ width: 48 }, { width: 16 }, { width: 22 }];
 
-  const questionMap = BASE_SURVEY_SECTIONS.flatMap((section) => section.questions).map((question) => ({ id: question.id, title: question.title }));
+  const matrix = workbook.addWorksheet("Matriz indicadores MINSAL", { views: [{ state: "frozen", ySplit: 3 }] });
+  title(matrix, "Matriz integral de indicadores y fuentes", 8);
+  matrix.addRow([]);
+  matrix.addRow(["Código", "Dimensión", "Indicador", "Fuente", "Resultado", "Base", "Estado", "Observación"]);
+  styleHeader(matrix.getRow(3));
+  analysis.indicators.forEach((item) => {
+    const row = matrix.addRow([
+      item.code,
+      item.dimension,
+      item.name,
+      "Encuesta",
+      item.value === null ? "" : item.value / 100,
+      item.base,
+      item.status,
+      item.value === null ? `Base inferior a ${analysis.minimum} o sin respuestas válidas` : "Calculado automáticamente",
+    ]);
+    if (item.value !== null) row.getCell(5).numFmt = "0.0%";
+  });
+  ADMINISTRATIVE_INDICATORS.forEach((item) => matrix.addRow([
+    item.code,
+    "Indicador de gestión de personas",
+    item.name,
+    item.source,
+    "",
+    "",
+    "Pendiente",
+    "Requiere nómina, remuneraciones, capacitación, postulaciones o contrataciones; no se calcula desde la encuesta.",
+  ]));
+  matrix.autoFilter = "A3:H3";
+  matrix.columns = [{ width: 12 }, { width: 34 }, { width: 52 }, { width: 18 }, { width: 15 }, { width: 10 }, { width: 16 }, { width: 58 }];
+
+  const distributions = workbook.addWorksheet("Distribución respuestas", { views: [{ state: "frozen", ySplit: 3 }] });
+  title(distributions, "Distribución completa de respuestas", 7);
+  distributions.addRow([]);
+  addDistributionTable(distributions, 3, allDistributions);
+  distributions.columns = [{ width: 12 }, { width: 58 }, { width: 58 }, { width: 34 }, { width: 14 }, { width: 14 }, { width: 12 }];
+
+  REPORT_THEMES.forEach((theme) => {
+    const sheet = workbook.addWorksheet(theme.sheetName, { views: [{ state: "frozen", ySplit: 4 }] });
+    title(sheet, theme.title, 7);
+    sheet.addRow([]);
+    sheet.addRow(["Código", "Indicador", "Fuente", "Resultado", "Base", "Estado", "Observación"]);
+    styleHeader(sheet.getRow(3));
+    theme.indicatorCodes.forEach((code) => {
+      const surveyItem = analysis.indicators.find((item) => item.code === code);
+      const administrativeItem = ADMINISTRATIVE_INDICATORS.find((item) => item.code === code);
+      if (surveyItem) {
+        const row = sheet.addRow([
+          surveyItem.code,
+          surveyItem.name,
+          "Encuesta",
+          surveyItem.value === null ? "" : surveyItem.value / 100,
+          surveyItem.base,
+          surveyItem.status,
+          surveyItem.value === null ? "Sin base suficiente" : "Calculado automáticamente",
+        ]);
+        if (surveyItem.value !== null) row.getCell(4).numFmt = "0.0%";
+      } else if (administrativeItem) {
+        sheet.addRow([administrativeItem.code, administrativeItem.name, "Administrativa", "", "", "Pendiente", "Requiere una base administrativa complementaria."]);
+      }
+    });
+    const themeRows = allDistributions.filter((row) => theme.questionIds.includes(row.questionId));
+    const startRow = Math.max(sheet.rowCount + 2, 7);
+    if (themeRows.length) addDistributionTable(sheet, startRow, themeRows);
+    else {
+      sheet.getCell(startRow, 1).value = "Este apartado no se calcula únicamente con respuestas de encuesta.";
+      sheet.mergeCells(startRow, 1, startRow + 1, 7);
+      sheet.getCell(startRow, 1).alignment = { wrapText: true, vertical: "middle" };
+    }
+    sheet.columns = [{ width: 12 }, { width: 54 }, { width: 18 }, { width: 30 }, { width: 14 }, { width: 16 }, { width: 58 }];
+  });
+
+  const questionMap = allQuestions.map((question) => ({ id: question.id, title: question.title }));
   const raw = workbook.addWorksheet("Base anonimizada", { views: [{ state: "frozen", ySplit: 1, xSplit: 3 }] });
   raw.addRow(["Código anónimo", "Unidad", "Fecha", ...questionMap.map((question) => `${question.id} · ${question.title}`)]);
   styleHeader(raw.getRow(1));
@@ -139,6 +305,36 @@ export async function GET() {
   raw.getColumn(3).numFmt = "dd-mm-yyyy hh:mm";
   raw.columns.forEach((column, index) => { column.width = index < 3 ? [18, 38, 20][index] : 42; });
   raw.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: raw.columnCount } };
+
+  const dictionary = workbook.addWorksheet("Diccionario", { views: [{ state: "frozen", ySplit: 3 }] });
+  title(dictionary, "Diccionario de preguntas y estructura de respuestas", 6);
+  dictionary.addRow([]);
+  dictionary.addRow(["Código", "Sección", "Pregunta", "Tipo", "Ítems", "Alternativas"]);
+  styleHeader(dictionary.getRow(3));
+  BASE_SURVEY_SECTIONS.forEach((section) => section.questions.forEach((question) => dictionary.addRow([
+    question.id,
+    section.title,
+    question.title,
+    question.type,
+    "rows" in question ? question.rows.join(" | ") : "",
+    "options" in question ? question.options.join(" | ") : "",
+  ])));
+  dictionary.columns = [{ width: 12 }, { width: 38 }, { width: 70 }, { width: 18 }, { width: 70 }, { width: 60 }];
+
+  const methodology = workbook.addWorksheet("Metodología");
+  title(methodology, "Metodología, alcance y resguardo del anonimato", 4);
+  methodology.addRow([]);
+  [
+    ["Propósito", "Consolidar resultados de la encuesta y relacionarlos con los indicadores y complementos de equidad entregados como referencia."],
+    ["Unidad de análisis", "Respuesta anónima. No se incluye RUT, correo, nombre ni otro identificador personal."],
+    ["Regla de anonimato", `No se muestran resultados segmentados con menos de ${analysis.minimum} respuestas.`],
+    ["Indicadores favorables", "Porcentaje de respuestas favorables según la definición de cada indicador."],
+    ["Indicadores inversos", "Se invierte el sentido al incorporarlos al índice global."],
+    ["Fuente encuesta", "Indicadores calculados directamente a partir de las 39 preguntas."],
+    ["Fuente administrativa", "Indicadores que requieren nómina, remuneraciones, capacitación, movilidad, postulaciones o contrataciones."],
+    ["Advertencia", "La ausencia de base administrativa no debe interpretarse como resultado cero ni como incumplimiento."],
+  ].forEach((row) => methodology.addRow(row));
+  methodology.columns = [{ width: 28 }, { width: 110 }, { width: 18 }, { width: 18 }];
 
   for (const sheet of workbook.worksheets) {
     sheet.properties.defaultRowHeight = 19;
