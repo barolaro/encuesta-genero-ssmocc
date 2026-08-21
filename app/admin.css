@@ -596,7 +596,8 @@
 .identity-plus { flex: 0 0 auto; color: #fff; font-size: 1.7rem; font-weight: 500; line-height: 1; }
 .identity-field { display: grid; gap: 8px; margin-top: 18px; color: #243952; font-size: .8rem; font-weight: 850; }
 .identity-field small { color: #7d8b9d; font-weight: 600; }
-.identity-field input, .identity-field textarea { width: 100%; margin: 0; border: 1px solid #bcc8d6; border-radius: 9px; padding: 13px; outline: none; }
+.identity-field input, .identity-field select, .identity-field textarea { width: 100%; margin: 0; border: 1px solid #bcc8d6; border-radius: 9px; padding: 13px; outline: none; background: #fff; color: #17243a; }
+.identity-field input[readonly] { background: #f1f4f8; color: #66758a; cursor: not-allowed; }
 .identity-field textarea { min-height: 190px; resize: vertical; }
 .logo-upload { position: relative; display: flex; align-items: center; gap: 13px; margin-top: 18px; padding: 16px; border: 1px dashed #8ea4bf; border-radius: 11px; background: #f5f8fc; color: #21476e; cursor: pointer; }
 .logo-upload:hover { border-color: #0039a6; background: #edf4ff; }
