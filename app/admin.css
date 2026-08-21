@@ -407,6 +407,8 @@
 }
 .report-actions { display: flex; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; }
 .report-actions .ghost-button { background: #ffffff1c; color: #fff; border: 1px solid #ffffff55; }
+.report-actions .report-pdf-button { background: #ef3340; box-shadow: 0 8px 22px #7a0e1a45; }
+.report-actions .report-pdf-button:hover { background: #d92533; }
 .analysis-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0; }
 .analysis-kpis article { background: #fff; border: 1px solid #e0e6ee; border-top: 4px solid #0039a6; border-radius: 14px; padding: 19px 20px; box-shadow: 0 8px 30px #0d28510a; }
 .analysis-kpis article.positive { border-top-color: #18864b; }
