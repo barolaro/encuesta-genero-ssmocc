@@ -17,14 +17,14 @@ export type InstitutionSettings = {
 };
 
 export const SSMOCC_ESTABLISHMENTS = [
-  { name: "Hospital San Juan de Dios", shortName: "HSJD" },
-  { name: "Hospital Clínico Dr. Félix Bulnes Cerda", shortName: "HFBC" },
-  { name: "Hospital San José de Melipilla", shortName: "HSJM" },
-  { name: "Hospital de Peñaflor", shortName: "HPE" },
-  { name: "Hospital de Talagante", shortName: "HTA" },
-  { name: "Hospital de Curacaví", shortName: "HCU" },
-  { name: "Instituto Traumatológico", shortName: "IT" },
-  { name: "CRS Dr. Salvador Allende", shortName: "CRS-SA" },
+  { name: "Hospital San Juan de Dios", shortName: "HSJD", logoUrl: "/logo-hsjd.png" },
+  { name: "Hospital Clínico Dr. Félix Bulnes Cerda", shortName: "HFBC", logoUrl: "/logo-felix-bulnes.png" },
+  { name: "Hospital San José de Melipilla", shortName: "HSJM", logoUrl: "/logo-melipilla.png" },
+  { name: "Hospital de Peñaflor", shortName: "HPE", logoUrl: "/logo-penaflor.png" },
+  { name: "Hospital de Talagante", shortName: "HTA", logoUrl: "/logo-talagante.svg" },
+  { name: "Hospital de Curacaví", shortName: "HCU", logoUrl: "/logo-curacavi.png" },
+  { name: "Instituto Traumatológico", shortName: "IT", logoUrl: "/logo-traumatologico.png" },
+  { name: "CRS Dr. Salvador Allende", shortName: "CRS-SA", logoUrl: "/logo-crs-salvador-allende.png" },
 ] as const;
 
 export const INSTITUTION_CONFIG: InstitutionSettings = {

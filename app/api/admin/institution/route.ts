@@ -20,7 +20,7 @@ export async function PATCH(request: Request) {
     (item) => item.name === institutionName,
   );
   const shortName = establishment?.shortName || "";
-  const logoUrl = String(body.logoUrl || "").trim();
+  const requestedLogoUrl = String(body.logoUrl || "").trim();
   const units = Array.isArray(body.units)
     ? body.units.map((unit: unknown) => String(unit).trim()).filter(Boolean)
     : [];
@@ -29,6 +29,9 @@ export async function PATCH(request: Request) {
       { error: "Selecciona un establecimiento perteneciente a la Red SSMOCC." },
       { status: 400 },
     );
+  const logoUrl = requestedLogoUrl.startsWith("data:image/")
+    ? requestedLogoUrl
+    : establishment.logoUrl;
   if (!logoUrl || !units.length)
     return NextResponse.json(
       { error: "Completa el nombre, la sigla, el logo y al menos una unidad." },
