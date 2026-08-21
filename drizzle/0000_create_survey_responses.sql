@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS "survey_responses" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,"codigo_anonimo" varchar(9) NOT NULL UNIQUE,"unidad" varchar(160) NOT NULL,"respuestas" jsonb NOT NULL,"created_at" timestamp with time zone DEFAULT now() NOT NULL);
