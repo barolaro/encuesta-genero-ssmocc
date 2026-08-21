@@ -31,6 +31,10 @@ function Header() {
       <div className="header-red">
         <p>{institution.subHeader}</p>
         <strong>{institution.institutionName}</strong>
+        <a className="admin-access" href="/administracion">
+          <LockKeyhole size={16} aria-hidden="true" />
+          <span>Administración</span>
+        </a>
       </div>
     </header>
   );
