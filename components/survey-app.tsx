@@ -9,7 +9,7 @@ import {
   RefreshCw,
   ShieldCheck,
 } from "lucide-react";
-import { INSTITUTION_CONFIG as institution } from "@/config/institution";
+import type { InstitutionSettings } from "@/config/institution";
 import { BASE_SURVEY_SECTIONS } from "@/config/base-survey";
 import {
   LIKERT_OPTIONS,
@@ -23,15 +23,17 @@ const makeCode = () => {
   const raw = Array.from(values, (v) => alphabet[v % alphabet.length]).join("");
   return `${raw.slice(0, 4)}-${raw.slice(4)}`;
 };
-function Header() {
+function Header({ institution }: { institution: InstitutionSettings }) {
   return (
     <header className="institutional-header">
       <div className="header-blue">
-        <img src={institution.logoUrl} alt={`Logo ${institution.shortName}`} />
+        <img src={institution.networkLogoUrl} alt={`Logo ${institution.networkShortName}`} />
       </div>
       <div className="header-red">
-        <p>{institution.subHeader}</p>
-        <strong>{institution.institutionName}</strong>
+        <div className="hospital-brand">
+          <span className="hospital-logo"><img src={institution.logoUrl} alt={`Logo ${institution.shortName}`} /></span>
+          <div><p>{institution.subHeader}</p><strong>{institution.institutionName}</strong><small>Red {institution.networkShortName}</small></div>
+        </div>
         <a className="admin-access" href="/administracion">
           <LockKeyhole size={16} aria-hidden="true" />
           <span>Administración</span>
@@ -180,7 +182,9 @@ function QuestionCard({
 }
 export function SurveyApp({
   survey,
+  institution,
 }: {
+  institution: InstitutionSettings;
   survey?: {
     id: string;
     title: string;
@@ -267,7 +271,7 @@ export function SurveyApp({
   };
   return (
     <>
-      <Header />
+      <Header institution={institution} />
       <div className="progress-shell">
         <div className="progress-meta">
           <span>
@@ -444,7 +448,7 @@ export function SurveyApp({
       </main>
       <footer>
         <span>Gobierno de Chile</span>
-        <p>{institution.institutionName} · Encuesta anónima</p>
+        <p>{institution.institutionName} · {institution.networkShortName} · Encuesta anónima</p>
       </footer>
     </>
   );

@@ -2,11 +2,11 @@ import ExcelJS from "exceljs";
 import { desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { BASE_SURVEY_SECTIONS } from "@/config/base-survey";
-import { INSTITUTION_CONFIG } from "@/config/institution";
 import { getDb } from "@/db";
 import { surveyResponses } from "@/db/schema";
 import { isAdmin } from "@/lib/admin-auth";
 import { analyzeSurvey } from "@/lib/survey-analysis";
+import { getInstitutionSettings } from "@/lib/institution-settings";
 
 export const runtime = "nodejs";
 
@@ -44,15 +44,18 @@ function safeValue(value: unknown) {
 
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  const responses = await getDb().select().from(surveyResponses).orderBy(desc(surveyResponses.createdAt));
+  const [responses, institution] = await Promise.all([
+    getDb().select().from(surveyResponses).orderBy(desc(surveyResponses.createdAt)),
+    getInstitutionSettings(),
+  ]);
   const analysis = analyzeSurvey(responses);
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = INSTITUTION_CONFIG.institutionName;
+  workbook.creator = `${institution.institutionName} · ${institution.networkShortName}`;
   workbook.created = new Date();
   workbook.subject = "Informe institucional de encuesta de género";
 
   const summary = workbook.addWorksheet("Resumen ejecutivo", { views: [{ state: "frozen", ySplit: 4 }] });
-  title(summary, `${INSTITUTION_CONFIG.surveyTitle} · Informe ejecutivo`, 5);
+  title(summary, `${institution.surveyTitle} · ${institution.institutionName}`, 5);
   summary.getCell("A3").value = "Generado";
   summary.getCell("B3").value = new Date();
   summary.getCell("B3").numFmt = "dd-mm-yyyy hh:mm";

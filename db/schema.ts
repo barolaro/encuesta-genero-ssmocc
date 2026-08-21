@@ -20,5 +20,14 @@ export const surveyResponses = pgTable("survey_responses", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const institutionSettings = pgTable("institution_settings", {
+  id: varchar("id", { length: 30 }).primaryKey().default("current"),
+  institutionName: varchar("institution_name", { length: 180 }).notNull(),
+  shortName: varchar("short_name", { length: 30 }).notNull(),
+  logoUrl: text("logo_url").notNull(),
+  units: jsonb("units").$type<string[]>().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export type SurveyResponse = typeof surveyResponses.$inferSelect;
 export type NewSurveyResponse = typeof surveyResponses.$inferInsert;

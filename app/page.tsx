@@ -3,8 +3,10 @@ import { getDb } from "@/db";
 import { surveys } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import type { SurveySection } from "@/config/survey";
+import { getInstitutionSettings } from "@/lib/institution-settings";
 export const dynamic = "force-dynamic";
 export default async function Home() {
+  const institution = await getInstitutionSettings();
   try {
     const [active] = await getDb()
       .select()
@@ -13,6 +15,7 @@ export default async function Home() {
       .limit(1);
     return (
       <SurveyApp
+        institution={institution}
         survey={
           active
             ? {
@@ -26,6 +29,6 @@ export default async function Home() {
       />
     );
   } catch {
-    return <SurveyApp />;
+    return <SurveyApp institution={institution} />;
   }
 }

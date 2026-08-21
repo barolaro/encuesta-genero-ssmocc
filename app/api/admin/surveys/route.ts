@@ -3,11 +3,12 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { surveys } from "@/db/schema";
 import { isAdmin } from "@/lib/admin-auth";
-import { INSTITUTION_CONFIG } from "@/config/institution";
+import { getInstitutionSettings } from "@/lib/institution-settings";
 export async function POST(request: Request) {
   if (!(await isAdmin()))
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const body = await request.json();
+  const institution = await getInstitutionSettings();
   if (
     !body.title?.trim() ||
     !Array.isArray(body.sections) ||
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
       description: body.description || "",
       status: "draft",
       anonymous: true,
-      units: body.units?.length ? body.units : [...INSTITUTION_CONFIG.units],
+      units: body.units?.length ? body.units : institution.units,
       sections: body.sections,
     })
     .returning();
