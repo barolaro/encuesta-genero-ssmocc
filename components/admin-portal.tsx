@@ -20,7 +20,7 @@ import {
   Settings2,
   UsersRound,
 } from "lucide-react";
-import type { InstitutionSettings } from "@/config/institution";
+import { SSMOCC_ESTABLISHMENTS, type InstitutionSettings } from "@/config/institution";
 import type { SurveySection } from "@/config/survey";
 import type { SurveyAnalysis } from "@/lib/survey-analysis";
 
@@ -820,8 +820,8 @@ export function AdminPortal({
             <article className="panel-card identity-editor">
               <header>
                 <div>
-                  <span className="mini-label">Configuración multi-hospital</span>
-                  <h2>Establecimiento actual</h2>
+                  <span className="mini-label">Configuración Red SSMOCC</span>
+                  <h2>Establecimiento de la red</h2>
                 </div>
                 <Settings2 />
               </header>
@@ -837,12 +837,27 @@ export function AdminPortal({
                 </div>
               </div>
               <label className="identity-field">
-                Nombre del hospital o establecimiento
-                <input value={identityDraft.institutionName} onChange={(event) => setIdentityDraft((current) => ({ ...current, institutionName: event.target.value }))} />
+                Hospital o establecimiento SSMOCC
+                <select
+                  value={identityDraft.institutionName}
+                  onChange={(event) => {
+                    const selected = SSMOCC_ESTABLISHMENTS.find((item) => item.name === event.target.value);
+                    if (selected)
+                      setIdentityDraft((current) => ({
+                        ...current,
+                        institutionName: selected.name,
+                        shortName: selected.shortName,
+                      }));
+                  }}
+                >
+                  {SSMOCC_ESTABLISHMENTS.map((item) => (
+                    <option key={item.name} value={item.name}>{item.name}</option>
+                  ))}
+                </select>
               </label>
               <label className="identity-field">
-                Sigla
-                <input value={identityDraft.shortName} maxLength={30} onChange={(event) => setIdentityDraft((current) => ({ ...current, shortName: event.target.value }))} />
+                Sigla institucional
+                <input value={identityDraft.shortName} readOnly aria-readonly="true" />
               </label>
               <label className="logo-upload">
                 <ImagePlus />
@@ -860,10 +875,10 @@ export function AdminPortal({
             </article>
             <aside className="identity-help">
               <span className="mini-label">Red asistencial</span>
-              <h2>Una plataforma, distintos hospitales</h2>
-              <p>El sello del SSMOCC permanece fijo y el logo del establecimiento se puede reemplazar para cada aplicación de la encuesta.</p>
+              <h2>Una plataforma exclusiva para Occidente</h2>
+              <p>El sello del SSMOCC permanece fijo. Solo se pueden seleccionar establecimientos pertenecientes a su red asistencial.</p>
               <ol>
-                <li>Ingresa el nombre y la sigla del nuevo hospital.</li>
+                <li>Selecciona un establecimiento de la Red SSMOCC.</li>
                 <li>Sube su logo institucional.</li>
                 <li>Actualiza las unidades participantes.</li>
                 <li>Guarda y revisa la encuesta pública.</li>

@@ -16,6 +16,17 @@ export type InstitutionSettings = {
   units: string[];
 };
 
+export const SSMOCC_ESTABLISHMENTS = [
+  { name: "Hospital San Juan de Dios", shortName: "HSJD" },
+  { name: "Hospital Clínico Dr. Félix Bulnes Cerda", shortName: "HFBC" },
+  { name: "Hospital San José de Melipilla", shortName: "HSJM" },
+  { name: "Hospital de Peñaflor", shortName: "HPE" },
+  { name: "Hospital de Talagante", shortName: "HTA" },
+  { name: "Hospital de Curacaví", shortName: "HCU" },
+  { name: "Instituto Traumatológico", shortName: "IT" },
+  { name: "CRS Dr. Salvador Allende", shortName: "CRS-SA" },
+] as const;
+
 export const INSTITUTION_CONFIG: InstitutionSettings = {
   institutionName: "Instituto Traumatológico",
   shortName: "IT",
