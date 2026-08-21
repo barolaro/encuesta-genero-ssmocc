@@ -9,6 +9,7 @@ import {
   Download,
   FileSpreadsheet,
   FilePlus2,
+  ImagePlus,
   LayoutDashboard,
   LockKeyhole,
   LogOut,
@@ -19,7 +20,7 @@ import {
   Settings2,
   UsersRound,
 } from "lucide-react";
-import { INSTITUTION_CONFIG as institution } from "@/config/institution";
+import type { InstitutionSettings } from "@/config/institution";
 import type { SurveySection } from "@/config/survey";
 import type { SurveyAnalysis } from "@/lib/survey-analysis";
 
@@ -53,7 +54,7 @@ const statusLabel: Record<string, string> = {
   closed: "Cerrada",
 };
 
-function Login({ done }: { done: () => void }) {
+function Login({ done, institution }: { done: () => void; institution: InstitutionSettings }) {
   const [password, setPassword] = useState(""),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
@@ -72,10 +73,10 @@ function Login({ done }: { done: () => void }) {
   return (
     <main className="admin-login">
       <section className="login-brand">
-        <img
-          src={institution.logoUrl}
-          alt="Servicio de Salud Metropolitano Occidente"
-        />
+        <div className="login-logos">
+          <img src={institution.networkLogoUrl} alt={institution.networkName} />
+          <span><img src={institution.logoUrl} alt={institution.institutionName} /></span>
+        </div>
         <div>
           <span>Gestión institucional</span>
           <h1>
@@ -118,7 +119,7 @@ function Login({ done }: { done: () => void }) {
   );
 }
 
-function NewSurvey({ close, saved }: { close: () => void; saved: () => void }) {
+function NewSurvey({ close, saved, institution }: { close: () => void; saved: () => void; institution: InstitutionSettings }) {
   const [title, setTitle] = useState(""),
     [description, setDescription] = useState(""),
     [sectionTitle, setSectionTitle] = useState("Experiencia y percepción"),
@@ -375,13 +376,54 @@ function EditSurvey({
   );
 }
 
-export function AdminPortal({ authenticated }: { authenticated: boolean }) {
+export function AdminPortal({
+  authenticated,
+  initialInstitution,
+}: {
+  authenticated: boolean;
+  initialInstitution: InstitutionSettings;
+}) {
   const [logged, setLogged] = useState(authenticated),
+    [institution, setInstitution] = useState(initialInstitution),
+    [identityDraft, setIdentityDraft] = useState(initialInstitution),
+    [unitsText, setUnitsText] = useState(initialInstitution.units.join("\n")),
+    [identityBusy, setIdentityBusy] = useState(false),
+    [identityMessage, setIdentityMessage] = useState(""),
     [data, setData] = useState<Overview | null>(null),
     [view, setView] = useState("resumen"),
     [creating, setCreating] = useState(false),
     [editing, setEditing] = useState<Survey | null>(null),
     [error, setError] = useState("");
+  const selectLogo = (file?: File) => {
+    setIdentityMessage("");
+    if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type))
+      return setIdentityMessage("Usa un logo PNG, JPG o WEBP.");
+    if (file.size > 750_000)
+      return setIdentityMessage("El logo debe pesar menos de 750 KB.");
+    const reader = new FileReader();
+    reader.onload = () =>
+      setIdentityDraft((current) => ({ ...current, logoUrl: String(reader.result) }));
+    reader.readAsDataURL(file);
+  };
+  const saveIdentity = async () => {
+    setIdentityBusy(true);
+    setIdentityMessage("");
+    const units = unitsText.split("\n").map((unit) => unit.trim()).filter(Boolean);
+    const response = await fetch("/api/admin/institution", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...identityDraft, units }),
+    });
+    const body = await response.json();
+    setIdentityBusy(false);
+    if (!response.ok)
+      return setIdentityMessage(body.error || "No fue posible guardar la identidad.");
+    const updated = { ...identityDraft, units };
+    setInstitution(updated);
+    setIdentityDraft(updated);
+    setIdentityMessage("Identidad actualizada. La encuesta pública ya muestra este establecimiento.");
+  };
   const load = async () => {
     const r = await fetch("/api/admin/overview");
     if (r.status === 401) return setLogged(false);
@@ -440,11 +482,14 @@ export function AdminPortal({ authenticated }: { authenticated: boolean }) {
   const exportExcel = () => {
     window.location.href = "/api/admin/reports/excel";
   };
-  if (!logged) return <Login done={() => setLogged(true)} />;
+  if (!logged) return <Login institution={institution} done={() => setLogged(true)} />;
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <img src={institution.logoUrl} alt="SSMOCC" />
+        <div className="sidebar-logos">
+          <img src={institution.networkLogoUrl} alt={institution.networkShortName} />
+          <span><img src={institution.logoUrl} alt={institution.shortName} /></span>
+        </div>
         <div className="admin-product">
           <span>Plataforma institucional</span>
           <strong>
@@ -470,6 +515,12 @@ export function AdminPortal({ authenticated }: { authenticated: boolean }) {
           >
             <BarChart3 /> Resultados e informes
           </button>
+          <button
+            className={view === "identidad" ? "active" : ""}
+            onClick={() => setView("identidad")}
+          >
+            <Settings2 /> Identidad del establecimiento
+          </button>
         </nav>
         <div className="sidebar-bottom">
           <a href="/">
@@ -494,17 +545,21 @@ export function AdminPortal({ authenticated }: { authenticated: boolean }) {
                 ? "Resumen ejecutivo"
                 : view === "encuestas"
                   ? "Gestión de encuestas"
-                  : "Resultados e informes"}
+                  : view === "resultados"
+                    ? "Resultados e informes"
+                    : "Identidad del establecimiento"}
             </h1>
           </div>
-          <div className="admin-top-actions">
-            <button className="ghost-button" onClick={importBaseSurvey}>
-              <Upload /> Cargar encuesta base
-            </button>
-            <button className="solid-button" onClick={() => setCreating(true)}>
-              <Plus /> Nueva encuesta
-            </button>
-          </div>
+          {view !== "identidad" && (
+            <div className="admin-top-actions">
+              <button className="ghost-button" onClick={importBaseSurvey}>
+                <Upload /> Cargar encuesta base
+              </button>
+              <button className="solid-button" onClick={() => setCreating(true)}>
+                <Plus /> Nueva encuesta
+              </button>
+            </div>
+          )}
         </header>
         {error && <div className="admin-error">{error}</div>}
         {view === "resumen" && (
@@ -760,9 +815,61 @@ export function AdminPortal({ authenticated }: { authenticated: boolean }) {
             </section>
           </>
         )}
+        {view === "identidad" && (
+          <section className="identity-layout">
+            <article className="panel-card identity-editor">
+              <header>
+                <div>
+                  <span className="mini-label">Configuración multi-hospital</span>
+                  <h2>Establecimiento actual</h2>
+                </div>
+                <Settings2 />
+              </header>
+              <div className="identity-preview">
+                <img src={institution.networkLogoUrl} alt={institution.networkShortName} />
+                <span>+</span>
+                <div><img src={identityDraft.logoUrl} alt="Vista previa del logo" /></div>
+              </div>
+              <label className="identity-field">
+                Nombre del hospital o establecimiento
+                <input value={identityDraft.institutionName} onChange={(event) => setIdentityDraft((current) => ({ ...current, institutionName: event.target.value }))} />
+              </label>
+              <label className="identity-field">
+                Sigla
+                <input value={identityDraft.shortName} maxLength={30} onChange={(event) => setIdentityDraft((current) => ({ ...current, shortName: event.target.value }))} />
+              </label>
+              <label className="logo-upload">
+                <ImagePlus />
+                <span><strong>Subir o reemplazar logo</strong><small>PNG, JPG o WEBP · máximo 750 KB</small></span>
+                <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectLogo(event.target.files?.[0])} />
+              </label>
+              <label className="identity-field">
+                Unidades o áreas <small>Una unidad por línea</small>
+                <textarea value={unitsText} onChange={(event) => setUnitsText(event.target.value)} />
+              </label>
+              {identityMessage && <div className={identityMessage.startsWith("Identidad") ? "admin-success" : "admin-error"}>{identityMessage}</div>}
+              <button className="solid-button identity-save" disabled={identityBusy} onClick={saveIdentity}>
+                {identityBusy ? "Guardando…" : "Guardar identidad"}
+              </button>
+            </article>
+            <aside className="identity-help">
+              <span className="mini-label">Red asistencial</span>
+              <h2>Una plataforma, distintos hospitales</h2>
+              <p>El sello del SSMOCC permanece fijo y el logo del establecimiento se puede reemplazar para cada aplicación de la encuesta.</p>
+              <ol>
+                <li>Ingresa el nombre y la sigla del nuevo hospital.</li>
+                <li>Sube su logo institucional.</li>
+                <li>Actualiza las unidades participantes.</li>
+                <li>Guarda y revisa la encuesta pública.</li>
+              </ol>
+              <strong>Actual: {institution.institutionName}</strong>
+            </aside>
+          </section>
+        )}
       </main>
       {creating && (
         <NewSurvey
+          institution={institution}
           close={() => setCreating(false)}
           saved={() => {
             setCreating(false);
