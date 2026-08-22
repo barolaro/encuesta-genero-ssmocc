@@ -1,4 +1,4 @@
-import { SurveyApp } from "@/components/survey-app";
+import { SurveyApp, SurveyUnavailable } from "@/components/survey-app";
 import { getDb } from "@/db";
 import { surveys } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -13,22 +13,19 @@ export default async function Home() {
       .from(surveys)
       .where(eq(surveys.status, "published"))
       .limit(1);
+    if (!active) return <SurveyUnavailable institution={institution} />;
     return (
       <SurveyApp
         institution={institution}
-        survey={
-          active
-            ? {
-                id: active.id,
-                title: active.title,
-                description: active.description,
-                sections: active.sections as SurveySection[],
-              }
-            : undefined
-        }
+        survey={{
+          id: active.id,
+          title: active.title,
+          description: active.description,
+          sections: active.sections as SurveySection[],
+        }}
       />
     );
   } catch {
-    return <SurveyApp institution={institution} />;
+    return <SurveyUnavailable institution={institution} />;
   }
 }

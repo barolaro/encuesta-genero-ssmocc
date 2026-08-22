@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Archive,
   BarChart3,
+  CalendarClock,
   CheckCircle2,
   ClipboardList,
   Download,
@@ -637,7 +638,58 @@ export function AdminPortal({
           )}
         </header>
         {error && <div className="admin-error">{error}</div>}
-        {view === "resumen" && (
+        {view === "resumen" && data && !data.selectedSurvey && (
+          <section className="cycle-empty-state">
+            <div className="cycle-empty-icon">
+              <CalendarClock />
+            </div>
+            <span className="mini-label">Ciclo de participación</span>
+            <h2>No hay una encuesta activa en este momento</h2>
+            <p>
+              El proceso anterior se encuentra finalizado y sus resultados
+              permanecen resguardados en el histórico. Puedes utilizar este
+              período para analizar la información o preparar la próxima
+              encuesta institucional.
+            </p>
+            <div className="cycle-options">
+              <article>
+                <BarChart3 />
+                <div>
+                  <strong>Analizar resultados anteriores</strong>
+                  <span>
+                    Consulta cada encuesta finalizada desde la bandeja
+                    histórica.
+                  </span>
+                </div>
+              </article>
+              <article>
+                <ClipboardList />
+                <div>
+                  <strong>Preparar el próximo proceso</strong>
+                  <span>
+                    Crea un borrador y publícalo cuando esté completamente
+                    revisado.
+                  </span>
+                </div>
+              </article>
+            </div>
+            <div className="cycle-empty-actions">
+              <button
+                className="ghost-button"
+                onClick={() => setView("encuestas")}
+              >
+                <Archive /> Ver histórico
+              </button>
+              <button
+                className="solid-button"
+                onClick={() => setCreating(true)}
+              >
+                <Plus /> Preparar nueva encuesta
+              </button>
+            </div>
+          </section>
+        )}
+        {view === "resumen" && data?.selectedSurvey && (
           <>
             <section className="metric-grid">
               <article>

@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import {
+  BarChart3,
+  CalendarClock,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -52,6 +54,61 @@ function Header({ institution }: { institution: InstitutionSettings }) {
         </a>
       </div>
     </header>
+  );
+}
+
+function SiteFooter({ institution }: { institution: InstitutionSettings }) {
+  return (
+    <footer>
+      <span>Gobierno de Chile</span>
+      <p>
+        {institution.institutionName} · {institution.networkShortName}
+      </p>
+      <p className="developer-credit">
+        Diseño y desarrollo: <strong>Bayron Retamal González</strong>
+      </p>
+    </footer>
+  );
+}
+
+export function SurveyUnavailable({
+  institution,
+}: {
+  institution: InstitutionSettings;
+}) {
+  return (
+    <>
+      <Header institution={institution} />
+      <main className="unavailable-shell">
+        <section className="unavailable-card">
+          <div className="unavailable-icon">
+            <CalendarClock aria-hidden="true" />
+          </div>
+          <span className="eyebrow">Participación funcionaria</span>
+          <h1>Próxima encuesta en preparación</h1>
+          <p>
+            Actualmente no existe una encuesta abierta. El equipo se encuentra
+            consolidando los resultados del proceso anterior y preparando una
+            nueva instancia de participación.
+          </p>
+          <div className="unavailable-status">
+            <BarChart3 aria-hidden="true" />
+            <div>
+              <strong>Proceso anterior finalizado</strong>
+              <span>
+                Los resultados se mantienen resguardados para su análisis
+                institucional.
+              </span>
+            </div>
+          </div>
+          <small>
+            Agradecemos tu interés. Cuando la próxima encuesta esté disponible,
+            podrás acceder desde este mismo sitio.
+          </small>
+        </section>
+      </main>
+      <SiteFooter institution={institution} />
+    </>
   );
 }
 function Matrix({
@@ -458,16 +515,7 @@ export function SurveyApp({
           </section>
         )}
       </main>
-      <footer>
-        <span>Gobierno de Chile</span>
-        <p>
-          {institution.institutionName} · {institution.networkShortName} ·
-          Encuesta anónima
-        </p>
-        <p className="developer-credit">
-          Diseño y desarrollo: <strong>Bayron Retamal González</strong>
-        </p>
-      </footer>
+      <SiteFooter institution={institution} />
     </>
   );
 }
