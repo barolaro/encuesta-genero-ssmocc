@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
   AlertTriangle,
+  Archive,
   BarChart3,
   CheckCircle2,
   ClipboardList,
@@ -19,9 +20,13 @@ import {
   Upload,
   Send,
   Settings2,
+  Trash2,
   UsersRound,
 } from "lucide-react";
-import { SSMOCC_ESTABLISHMENTS, type InstitutionSettings } from "@/config/institution";
+import {
+  SSMOCC_ESTABLISHMENTS,
+  type InstitutionSettings,
+} from "@/config/institution";
 import type { SurveySection } from "@/config/survey";
 import type { SurveyAnalysis } from "@/lib/survey-analysis";
 
@@ -55,7 +60,13 @@ const statusLabel: Record<string, string> = {
   closed: "Cerrada",
 };
 
-function Login({ done, institution }: { done: () => void; institution: InstitutionSettings }) {
+function Login({
+  done,
+  institution,
+}: {
+  done: () => void;
+  institution: InstitutionSettings;
+}) {
   const [password, setPassword] = useState(""),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
@@ -76,7 +87,9 @@ function Login({ done, institution }: { done: () => void; institution: Instituti
       <section className="login-brand">
         <div className="login-logos">
           <img src={institution.networkLogoUrl} alt={institution.networkName} />
-          <span><img src={institution.logoUrl} alt={institution.institutionName} /></span>
+          <span>
+            <img src={institution.logoUrl} alt={institution.institutionName} />
+          </span>
         </div>
         <div>
           <span>Gestión institucional</span>
@@ -120,7 +133,15 @@ function Login({ done, institution }: { done: () => void; institution: Instituti
   );
 }
 
-function NewSurvey({ close, saved, institution }: { close: () => void; saved: () => void; institution: InstitutionSettings }) {
+function NewSurvey({
+  close,
+  saved,
+  institution,
+}: {
+  close: () => void;
+  saved: () => void;
+  institution: InstitutionSettings;
+}) {
   const [title, setTitle] = useState(""),
     [description, setDescription] = useState(""),
     [sectionTitle, setSectionTitle] = useState("Experiencia y percepción"),
@@ -398,19 +419,25 @@ export function AdminPortal({
   const selectLogo = (file?: File) => {
     setIdentityMessage("");
     if (!file) return;
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type))
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type))
       return setIdentityMessage("Usa un logo PNG, JPG o WEBP.");
     if (file.size > 750_000)
       return setIdentityMessage("El logo debe pesar menos de 750 KB.");
     const reader = new FileReader();
     reader.onload = () =>
-      setIdentityDraft((current) => ({ ...current, logoUrl: String(reader.result) }));
+      setIdentityDraft((current) => ({
+        ...current,
+        logoUrl: String(reader.result),
+      }));
     reader.readAsDataURL(file);
   };
   const saveIdentity = async () => {
     setIdentityBusy(true);
     setIdentityMessage("");
-    const units = unitsText.split("\n").map((unit) => unit.trim()).filter(Boolean);
+    const units = unitsText
+      .split("\n")
+      .map((unit) => unit.trim())
+      .filter(Boolean);
     const response = await fetch("/api/admin/institution", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -419,11 +446,15 @@ export function AdminPortal({
     const body = await response.json();
     setIdentityBusy(false);
     if (!response.ok)
-      return setIdentityMessage(body.error || "No fue posible guardar la identidad.");
+      return setIdentityMessage(
+        body.error || "No fue posible guardar la identidad.",
+      );
     const updated = { ...identityDraft, units };
     setInstitution(updated);
     setIdentityDraft(updated);
-    setIdentityMessage("Identidad actualizada. La encuesta pública ya muestra este establecimiento.");
+    setIdentityMessage(
+      "Identidad actualizada. La encuesta pública ya muestra este establecimiento.",
+    );
   };
   const load = async () => {
     const r = await fetch("/api/admin/overview");
@@ -446,6 +477,23 @@ export function AdminPortal({
       body: JSON.stringify({ id, status }),
     });
     load();
+  };
+  const deleteSurvey = async (survey: Survey) => {
+    const confirmed = window.confirm(
+      `¿Eliminar definitivamente “${survey.title}”?\n\nTambién se borrarán todas sus respuestas asociadas. Esta acción no se puede deshacer.`,
+    );
+    if (!confirmed) return;
+    setError("");
+    const response = await fetch("/api/admin/surveys", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: survey.id }),
+    });
+    if (!response.ok) {
+      const body = await response.json();
+      return setError(body.error || "No fue posible eliminar la encuesta.");
+    }
+    await load();
   };
   const importBaseSurvey = async () => {
     setError("");
@@ -486,13 +534,19 @@ export function AdminPortal({
   const exportPdf = () => {
     window.location.href = "/api/admin/reports/pdf";
   };
-  if (!logged) return <Login institution={institution} done={() => setLogged(true)} />;
+  if (!logged)
+    return <Login institution={institution} done={() => setLogged(true)} />;
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <div className="sidebar-logos">
-          <img src={institution.networkLogoUrl} alt={institution.networkShortName} />
-          <span><img src={institution.logoUrl} alt={institution.shortName} /></span>
+          <img
+            src={institution.networkLogoUrl}
+            alt={institution.networkShortName}
+          />
+          <span>
+            <img src={institution.logoUrl} alt={institution.shortName} />
+          </span>
         </div>
         <div className="admin-product">
           <span>Plataforma institucional</span>
@@ -559,7 +613,10 @@ export function AdminPortal({
               <button className="ghost-button" onClick={importBaseSurvey}>
                 <Upload /> Cargar encuesta base
               </button>
-              <button className="solid-button" onClick={() => setCreating(true)}>
+              <button
+                className="solid-button"
+                onClick={() => setCreating(true)}
+              >
                 <Plus /> Nueva encuesta
               </button>
             </div>
@@ -659,46 +716,123 @@ export function AdminPortal({
           </>
         )}
         {view === "encuestas" && (
-          <section className="panel-card">
-            <div className="table-head">
-              <span>Encuesta</span>
-              <span>Estado</span>
-              <span>Creación</span>
-              <span>Acción</span>
-            </div>
-            {data?.surveys.map((s) => (
-              <div className="survey-row" key={s.id}>
+          <div className="survey-management">
+            <section className="panel-card">
+              <header className="panel-title survey-section-title">
                 <div>
-                  <strong>{s.title}</strong>
-                  <small>{s.description || "Sin descripción"}</small>
+                  <ClipboardList />
+                  <div>
+                    <h2>Encuestas en gestión</h2>
+                    <p>Borradores y encuestas actualmente publicadas.</p>
+                  </div>
                 </div>
-                <span className={`status ${s.status}`}>
-                  {statusLabel[s.status]}
-                </span>
-                <span>{new Date(s.createdAt).toLocaleDateString("es-CL")}</span>
-                <div className="survey-actions">
-                  <button onClick={() => setEditing(s)}>
-                    <Pencil /> Editar
-                  </button>
-                  {s.status !== "published" ? (
-                    <button onClick={() => publish(s.id, "published")}>
-                      <Send /> Publicar
-                    </button>
-                  ) : (
-                    <button onClick={() => publish(s.id, "closed")}>
-                      <CheckCircle2 /> Cerrar
-                    </button>
-                  )}
-                </div>
+              </header>
+              <div className="table-head">
+                <span>Encuesta</span>
+                <span>Estado</span>
+                <span>Creación</span>
+                <span>Acción</span>
               </div>
-            ))}
-          </section>
+              {data?.surveys
+                .filter((s) => s.status !== "closed")
+                .map((s) => (
+                  <div className="survey-row" key={s.id}>
+                    <div>
+                      <strong>{s.title}</strong>
+                      <small>{s.description || "Sin descripción"}</small>
+                    </div>
+                    <span className={`status ${s.status}`}>
+                      {statusLabel[s.status]}
+                    </span>
+                    <span>
+                      {new Date(s.createdAt).toLocaleDateString("es-CL")}
+                    </span>
+                    <div className="survey-actions">
+                      <button onClick={() => setEditing(s)}>
+                        <Pencil /> Editar
+                      </button>
+                      {s.status !== "published" ? (
+                        <button onClick={() => publish(s.id, "published")}>
+                          <Send /> Publicar
+                        </button>
+                      ) : (
+                        <button onClick={() => publish(s.id, "closed")}>
+                          <CheckCircle2 /> Cerrar y archivar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              {!data?.surveys.some((s) => s.status !== "closed") && (
+                <p className="empty-state">
+                  No hay encuestas activas ni borradores.
+                </p>
+              )}
+            </section>
+
+            <section className="panel-card history-panel">
+              <header className="panel-title survey-section-title">
+                <div>
+                  <Archive />
+                  <div>
+                    <h2>Histórico de encuestas finalizadas</h2>
+                    <p>
+                      Consulta, vuelve a publicar o elimina pruebas antiguas.
+                    </p>
+                  </div>
+                </div>
+                <span className="history-count">
+                  {data?.surveys.filter((s) => s.status === "closed").length ||
+                    0}{" "}
+                  archivadas
+                </span>
+              </header>
+              <div className="table-head">
+                <span>Encuesta</span>
+                <span>Estado</span>
+                <span>Creación</span>
+                <span>Acción</span>
+              </div>
+              {data?.surveys
+                .filter((s) => s.status === "closed")
+                .map((s) => (
+                  <div className="survey-row" key={s.id}>
+                    <div>
+                      <strong>{s.title}</strong>
+                      <small>{s.description || "Sin descripción"}</small>
+                    </div>
+                    <span className="status closed">Finalizada</span>
+                    <span>
+                      {new Date(s.createdAt).toLocaleDateString("es-CL")}
+                    </span>
+                    <div className="survey-actions history-actions">
+                      <button onClick={() => publish(s.id, "published")}>
+                        <Send /> Volver a publicar
+                      </button>
+                      <button
+                        className="delete-survey"
+                        onClick={() => deleteSurvey(s)}
+                      >
+                        <Trash2 /> Eliminar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              {!data?.surveys.some((s) => s.status === "closed") && (
+                <p className="empty-state">
+                  Las encuestas cerradas aparecerán aquí.
+                </p>
+              )}
+            </section>
+          </div>
         )}
         {view === "resultados" && (
           <>
             <section className="report-hero">
               <div>
-                <span className="mini-label">Informe institucional NCh3262</span>
+                <span className="mini-label">
+                  Informe institucional NCh3262
+                </span>
                 <h2>Análisis integral de género y equidad</h2>
                 <p>
                   Indicadores de percepción, brechas, alertas y resultados por
@@ -712,7 +846,10 @@ export function AdminPortal({
                 <button className="solid-button" onClick={exportExcel}>
                   <FileSpreadsheet /> Excel técnico completo
                 </button>
-                <button className="solid-button report-pdf-button" onClick={exportPdf}>
+                <button
+                  className="solid-button report-pdf-button"
+                  onClick={exportPdf}
+                >
                   <FileText /> Informe gerencial PDF
                 </button>
               </div>
@@ -720,7 +857,11 @@ export function AdminPortal({
             <section className="analysis-kpis">
               <article>
                 <small>Índice global favorable</small>
-                <strong>{data?.analysis.overallScore == null ? "—" : `${data.analysis.overallScore}%`}</strong>
+                <strong>
+                  {data?.analysis.overallScore == null
+                    ? "—"
+                    : `${data.analysis.overallScore}%`}
+                </strong>
                 <p>Promedio ajustado de indicadores calculables</p>
               </article>
               <article className="positive">
@@ -751,11 +892,30 @@ export function AdminPortal({
                 <div className="dimension-list">
                   {data?.analysis.dimensions.map((item) => (
                     <div key={item.dimension}>
-                      <div><span>{item.dimension}</span><strong>{item.score}%</strong></div>
-                      <i><b className={item.score >= 70 ? "good" : item.score >= 50 ? "medium" : "bad"} style={{ width: `${item.score}%` }} /></i>
+                      <div>
+                        <span>{item.dimension}</span>
+                        <strong>{item.score}%</strong>
+                      </div>
+                      <i>
+                        <b
+                          className={
+                            item.score >= 70
+                              ? "good"
+                              : item.score >= 50
+                                ? "medium"
+                                : "bad"
+                          }
+                          style={{ width: `${item.score}%` }}
+                        />
+                      </i>
                     </div>
                   ))}
-                  {!data?.analysis.dimensions.length && <p className="empty-state">Los indicadores aparecerán al alcanzar 5 respuestas válidas.</p>}
+                  {!data?.analysis.dimensions.length && (
+                    <p className="empty-state">
+                      Los indicadores aparecerán al alcanzar 5 respuestas
+                      válidas.
+                    </p>
+                  )}
                 </div>
               </article>
               <article className="panel-card alert-panel">
@@ -766,18 +926,27 @@ export function AdminPortal({
                   </div>
                   <AlertTriangle />
                 </header>
-                {data && Object.entries({
-                  "Discriminación": data.analysis.alerts.discrimination,
-                  "Acoso laboral": data.analysis.alerts.workplaceHarassment,
-                  "Acoso sexual": data.analysis.alerts.sexualHarassment,
-                  "Malestar anímico": data.analysis.alerts.emotionalDistress,
-                }).map(([label, item]) => (
-                  <div className="alert-row" key={label}>
-                    <span>{label}<small>Base: {item.base}</small></span>
-                    <strong>{item.value == null ? "—" : `${item.value}%`}</strong>
-                  </div>
-                ))}
-                <p className="privacy-note">Resultados agregados. Nunca se muestran cruces con menos de 5 respuestas.</p>
+                {data &&
+                  Object.entries({
+                    Discriminación: data.analysis.alerts.discrimination,
+                    "Acoso laboral": data.analysis.alerts.workplaceHarassment,
+                    "Acoso sexual": data.analysis.alerts.sexualHarassment,
+                    "Malestar anímico": data.analysis.alerts.emotionalDistress,
+                  }).map(([label, item]) => (
+                    <div className="alert-row" key={label}>
+                      <span>
+                        {label}
+                        <small>Base: {item.base}</small>
+                      </span>
+                      <strong>
+                        {item.value == null ? "—" : `${item.value}%`}
+                      </strong>
+                    </div>
+                  ))}
+                <p className="privacy-note">
+                  Resultados agregados. Nunca se muestran cruces con menos de 5
+                  respuestas.
+                </p>
               </article>
             </section>
             <section className="panel-card indicator-panel">
@@ -788,15 +957,28 @@ export function AdminPortal({
                 </div>
               </header>
               <div className="indicator-head">
-                <span>Código e indicador</span><span>Dimensión</span><span>Base</span><span>Resultado</span><span>Estado</span>
+                <span>Código e indicador</span>
+                <span>Dimensión</span>
+                <span>Base</span>
+                <span>Resultado</span>
+                <span>Estado</span>
               </div>
               {data?.analysis.indicators.map((item) => (
                 <div className="indicator-row" key={item.code}>
-                  <div><code>{item.code}</code><strong>{item.name}</strong></div>
+                  <div>
+                    <code>{item.code}</code>
+                    <strong>{item.name}</strong>
+                  </div>
                   <span>{item.dimension}</span>
                   <span>{item.base}</span>
-                  <strong>{item.value == null ? "Protegido" : `${item.value}%`}</strong>
-                  <span className={`analysis-status ${item.status.toLowerCase().replace("í", "i").replace(" ", "-")}`}>{item.status}</span>
+                  <strong>
+                    {item.value == null ? "Protegido" : `${item.value}%`}
+                  </strong>
+                  <span
+                    className={`analysis-status ${item.status.toLowerCase().replace("í", "i").replace(" ", "-")}`}
+                  >
+                    {item.status}
+                  </span>
                 </div>
               ))}
             </section>
@@ -834,12 +1016,20 @@ export function AdminPortal({
               </header>
               <div className="identity-preview">
                 <div className="identity-brand-card network-brand-card">
-                  <img src={institution.networkLogoUrl} alt={institution.networkShortName} />
+                  <img
+                    src={institution.networkLogoUrl}
+                    alt={institution.networkShortName}
+                  />
                   <small>Servicio de Salud</small>
                 </div>
-                <span className="identity-plus" aria-hidden="true">+</span>
+                <span className="identity-plus" aria-hidden="true">
+                  +
+                </span>
                 <div className="identity-brand-card hospital-brand-card">
-                  <img src={identityDraft.logoUrl} alt="Vista previa del logo" />
+                  <img
+                    src={identityDraft.logoUrl}
+                    alt="Vista previa del logo"
+                  />
                   <small>{identityDraft.shortName || "Establecimiento"}</small>
                 </div>
               </div>
@@ -848,7 +1038,9 @@ export function AdminPortal({
                 <select
                   value={identityDraft.institutionName}
                   onChange={(event) => {
-                    const selected = SSMOCC_ESTABLISHMENTS.find((item) => item.name === event.target.value);
+                    const selected = SSMOCC_ESTABLISHMENTS.find(
+                      (item) => item.name === event.target.value,
+                    );
                     if (selected)
                       setIdentityDraft((current) => ({
                         ...current,
@@ -859,35 +1051,73 @@ export function AdminPortal({
                   }}
                 >
                   {SSMOCC_ESTABLISHMENTS.map((item) => (
-                    <option key={item.name} value={item.name}>{item.name}</option>
+                    <option key={item.name} value={item.name}>
+                      {item.name}
+                    </option>
                   ))}
                 </select>
               </label>
               <label className="identity-field">
                 Sigla institucional
-                <input value={identityDraft.shortName} readOnly aria-readonly="true" />
+                <input
+                  value={identityDraft.shortName}
+                  readOnly
+                  aria-readonly="true"
+                />
               </label>
               <label className="logo-upload">
                 <ImagePlus />
-                <span><strong>Usar un logo personalizado</strong><small>El logo oficial cambia automáticamente · PNG, JPG o WEBP · máximo 750 KB</small></span>
-                <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectLogo(event.target.files?.[0])} />
+                <span>
+                  <strong>Usar un logo personalizado</strong>
+                  <small>
+                    El logo oficial cambia automáticamente · PNG, JPG o WEBP ·
+                    máximo 750 KB
+                  </small>
+                </span>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(event) => selectLogo(event.target.files?.[0])}
+                />
               </label>
               <label className="identity-field">
                 Unidades o áreas <small>Una unidad por línea</small>
-                <textarea value={unitsText} onChange={(event) => setUnitsText(event.target.value)} />
+                <textarea
+                  value={unitsText}
+                  onChange={(event) => setUnitsText(event.target.value)}
+                />
               </label>
-              {identityMessage && <div className={identityMessage.startsWith("Identidad") ? "admin-success" : "admin-error"}>{identityMessage}</div>}
-              <button className="solid-button identity-save" disabled={identityBusy} onClick={saveIdentity}>
+              {identityMessage && (
+                <div
+                  className={
+                    identityMessage.startsWith("Identidad")
+                      ? "admin-success"
+                      : "admin-error"
+                  }
+                >
+                  {identityMessage}
+                </div>
+              )}
+              <button
+                className="solid-button identity-save"
+                disabled={identityBusy}
+                onClick={saveIdentity}
+              >
                 {identityBusy ? "Guardando…" : "Guardar identidad"}
               </button>
             </article>
             <aside className="identity-help">
               <span className="mini-label">Red asistencial</span>
               <h2>Una plataforma exclusiva para Occidente</h2>
-              <p>El sello del SSMOCC permanece fijo. Solo se pueden seleccionar establecimientos pertenecientes a su red asistencial.</p>
+              <p>
+                El sello del SSMOCC permanece fijo. Solo se pueden seleccionar
+                establecimientos pertenecientes a su red asistencial.
+              </p>
               <ol>
                 <li>Selecciona un establecimiento de la Red SSMOCC.</li>
-                <li>El nombre, la sigla y el logo se cargarán automáticamente.</li>
+                <li>
+                  El nombre, la sigla y el logo se cargarán automáticamente.
+                </li>
                 <li>Actualiza las unidades participantes.</li>
                 <li>Guarda y revisa la encuesta pública.</li>
               </ol>
