@@ -48,6 +48,7 @@ type ResponseRow = {
 };
 type Overview = {
   surveys: Survey[];
+  selectedSurvey: Survey | null;
   responses: ResponseRow[];
   metrics: { total: number; surveys: number; active: number; units: number };
   byUnit: Record<string, number>;
@@ -456,8 +457,9 @@ export function AdminPortal({
       "Identidad actualizada. La encuesta pública ya muestra este establecimiento.",
     );
   };
-  const load = async () => {
-    const r = await fetch("/api/admin/overview");
+  const load = async (surveyId?: string) => {
+    const query = surveyId ? `?surveyId=${encodeURIComponent(surveyId)}` : "";
+    const r = await fetch(`/api/admin/overview${query}`);
     if (r.status === 401) return setLogged(false);
     if (!r.ok)
       return setError("Configura la base de datos para activar el panel.");
@@ -529,10 +531,16 @@ export function AdminPortal({
     a.click();
   };
   const exportExcel = () => {
-    window.location.href = "/api/admin/reports/excel";
+    if (!data?.selectedSurvey) return;
+    window.location.href = `/api/admin/reports/excel?surveyId=${encodeURIComponent(data.selectedSurvey.id)}`;
   };
   const exportPdf = () => {
-    window.location.href = "/api/admin/reports/pdf";
+    if (!data?.selectedSurvey) return;
+    window.location.href = `/api/admin/reports/pdf?surveyId=${encodeURIComponent(data.selectedSurvey.id)}`;
+  };
+  const openResults = async (survey: Survey) => {
+    await load(survey.id);
+    setView("resultados");
   };
   if (!logged)
     return <Login institution={institution} done={() => setLogged(true)} />;
@@ -557,7 +565,10 @@ export function AdminPortal({
         <nav>
           <button
             className={view === "resumen" ? "active" : ""}
-            onClick={() => setView("resumen")}
+            onClick={() => {
+              setView("resumen");
+              load();
+            }}
           >
             <LayoutDashboard /> Resumen ejecutivo
           </button>
@@ -569,7 +580,10 @@ export function AdminPortal({
           </button>
           <button
             className={view === "resultados" ? "active" : ""}
-            onClick={() => setView("resultados")}
+            onClick={() => {
+              setView("resultados");
+              load();
+            }}
           >
             <BarChart3 /> Resultados e informes
           </button>
@@ -814,6 +828,9 @@ export function AdminPortal({
                       {new Date(s.createdAt).toLocaleDateString("es-CL")}
                     </span>
                     <div className="survey-actions history-actions">
+                      <button onClick={() => openResults(s)}>
+                        <BarChart3 /> Ver resultados
+                      </button>
                       <button onClick={() => publish(s.id, "published")}>
                         <Send /> Volver a publicar
                       </button>
@@ -836,6 +853,31 @@ export function AdminPortal({
         )}
         {view === "resultados" && (
           <>
+            <section className="report-scope panel-card">
+              <div>
+                <span className="mini-label">Resultados independientes</span>
+                <h2>{data?.selectedSurvey?.title || "Sin encuesta activa"}</h2>
+                <p>
+                  {data?.selectedSurvey
+                    ? `${statusLabel[data.selectedSurvey.status]} · ${data.metrics.total} participaciones de esta encuesta`
+                    : "Publica una encuesta nueva o selecciona una finalizada para consultar su histórico."}
+                </p>
+              </div>
+              <label>
+                Consultar encuesta
+                <select
+                  value={data?.selectedSurvey?.id || ""}
+                  onChange={(event) => load(event.target.value || undefined)}
+                >
+                  <option value="">Ciclo actual (sin encuesta activa)</option>
+                  {data?.surveys.map((survey) => (
+                    <option value={survey.id} key={survey.id}>
+                      {survey.title} · {statusLabel[survey.status]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </section>
             <section className="report-hero">
               <div>
                 <span className="mini-label">
@@ -848,15 +890,24 @@ export function AdminPortal({
                 </p>
               </div>
               <div className="report-actions">
-                <button className="ghost-button" onClick={exportCsv}>
+                <button
+                  className="ghost-button"
+                  onClick={exportCsv}
+                  disabled={!data?.selectedSurvey}
+                >
                   <Download /> Base CSV
                 </button>
-                <button className="solid-button" onClick={exportExcel}>
+                <button
+                  className="solid-button"
+                  onClick={exportExcel}
+                  disabled={!data?.selectedSurvey}
+                >
                   <FileSpreadsheet /> Excel técnico completo
                 </button>
                 <button
                   className="solid-button report-pdf-button"
                   onClick={exportPdf}
+                  disabled={!data?.selectedSurvey}
                 >
                   <FileText /> Informe gerencial PDF
                 </button>
