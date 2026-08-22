@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getDb } from "@/db";
-import { surveys } from "@/db/schema";
+import { surveyResponses, surveys } from "@/db/schema";
 import { isAdmin } from "@/lib/admin-auth";
 import { getInstitutionSettings } from "@/lib/institution-settings";
 export async function POST(request: Request) {
@@ -55,4 +55,32 @@ export async function PATCH(request: Request) {
     .where(eq(surveys.id, id))
     .returning();
   return NextResponse.json(updated);
+}
+
+export async function DELETE(request: Request) {
+  if (!(await isAdmin()))
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  const { id } = await request.json();
+  if (!id)
+    return NextResponse.json(
+      { error: "No se indicó la encuesta" },
+      { status: 400 },
+    );
+  const db = getDb();
+  const [survey] = await db.select().from(surveys).where(eq(surveys.id, id));
+  if (!survey)
+    return NextResponse.json(
+      { error: "Encuesta no encontrada" },
+      { status: 404 },
+    );
+  if (survey.status !== "closed")
+    return NextResponse.json(
+      { error: "Solo se pueden eliminar encuestas que estén en el histórico" },
+      { status: 409 },
+    );
+  await db.transaction(async (tx) => {
+    await tx.delete(surveyResponses).where(eq(surveyResponses.surveyId, id));
+    await tx.delete(surveys).where(eq(surveys.id, id));
+  });
+  return NextResponse.json({ ok: true });
 }

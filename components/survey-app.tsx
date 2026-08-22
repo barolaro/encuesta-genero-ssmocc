@@ -27,12 +27,24 @@ function Header({ institution }: { institution: InstitutionSettings }) {
   return (
     <header className="institutional-header">
       <div className="header-blue">
-        <img src={institution.networkLogoUrl} alt={`Logo ${institution.networkShortName}`} />
+        <img
+          src={institution.networkLogoUrl}
+          alt={`Logo ${institution.networkShortName}`}
+        />
       </div>
       <div className="header-red">
         <div className="hospital-brand">
-          <span className="hospital-logo"><img src={institution.logoUrl} alt={`Logo ${institution.shortName}`} /></span>
-          <div><p>{institution.subHeader}</p><strong>{institution.institutionName}</strong><small>Red {institution.networkShortName}</small></div>
+          <span className="hospital-logo">
+            <img
+              src={institution.logoUrl}
+              alt={`Logo ${institution.shortName}`}
+            />
+          </span>
+          <div>
+            <p>{institution.subHeader}</p>
+            <strong>{institution.institutionName}</strong>
+            <small>Red {institution.networkShortName}</small>
+          </div>
         </div>
         <a className="admin-access" href="/administracion">
           <LockKeyhole size={16} aria-hidden="true" />
@@ -448,7 +460,13 @@ export function SurveyApp({
       </main>
       <footer>
         <span>Gobierno de Chile</span>
-        <p>{institution.institutionName} · {institution.networkShortName} · Encuesta anónima</p>
+        <p>
+          {institution.institutionName} · {institution.networkShortName} ·
+          Encuesta anónima
+        </p>
+        <p className="developer-credit">
+          Diseño y desarrollo: <strong>Bayron Retamal González</strong>
+        </p>
       </footer>
     </>
   );
