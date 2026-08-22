@@ -435,11 +435,11 @@
   font-size: 0.68rem;
   font-weight: 900;
 }
-.history-actions .delete-survey {
+.survey-actions .delete-survey {
   color: #a51d2a;
   background: #fff0f1;
 }
-.history-actions .delete-survey:hover {
+.survey-actions .delete-survey:hover {
   color: #fff;
   background: #b52332;
 }
