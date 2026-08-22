@@ -73,9 +73,9 @@ export async function DELETE(request: Request) {
       { error: "Encuesta no encontrada" },
       { status: 404 },
     );
-  if (survey.status !== "closed")
+  if (survey.status === "published")
     return NextResponse.json(
-      { error: "Solo se pueden eliminar encuestas que estén en el histórico" },
+      { error: "Cierra la encuesta activa antes de eliminarla" },
       { status: 409 },
     );
   await db.transaction(async (tx) => {
