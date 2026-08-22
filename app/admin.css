@@ -455,6 +455,45 @@
   overflow: hidden;
   position: relative;
 }
+.report-scope {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+  padding: 22px 25px;
+  border-left: 5px solid #0039a6;
+}
+.report-scope h2 {
+  margin: 5px 0;
+  font-size: 1.15rem;
+}
+.report-scope p {
+  margin: 0;
+  color: #718097;
+  font-size: 0.78rem;
+}
+.report-scope label {
+  display: grid;
+  gap: 7px;
+  min-width: min(350px, 42%);
+  color: #51657c;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+.report-scope select {
+  width: 100%;
+  border: 1px solid #b9c6d5;
+  border-radius: 9px;
+  padding: 11px 12px;
+  background: #fff;
+  color: #17243a;
+}
+.report-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
 .report-hero:after {
   content: "";
   position: absolute;
@@ -1166,6 +1205,13 @@
   }
 }
 @media (max-width: 650px) {
+  .report-scope {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .report-scope label {
+    min-width: 100%;
+  }
   .identity-preview {
     gap: 10px;
     padding: 18px 12px;
