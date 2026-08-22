@@ -752,9 +752,17 @@ export function AdminPortal({
                         <Pencil /> Editar
                       </button>
                       {s.status !== "published" ? (
-                        <button onClick={() => publish(s.id, "published")}>
-                          <Send /> Publicar
-                        </button>
+                        <>
+                          <button onClick={() => publish(s.id, "published")}>
+                            <Send /> Publicar
+                          </button>
+                          <button
+                            className="delete-survey"
+                            onClick={() => deleteSurvey(s)}
+                          >
+                            <Trash2 /> Eliminar borrador
+                          </button>
+                        </>
                       ) : (
                         <button onClick={() => publish(s.id, "closed")}>
                           <CheckCircle2 /> Cerrar y archivar
