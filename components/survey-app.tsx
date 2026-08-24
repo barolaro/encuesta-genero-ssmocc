@@ -159,17 +159,28 @@ function Matrix({
 }
 function QuestionCard({
   question,
+  number,
+  totalQuestions,
   answer,
   setAnswer,
 }: {
   question: Question;
+  number: number;
+  totalQuestions: number;
   answer: Answers[string] | undefined;
   setAnswer: (v: Answers[string]) => void;
 }) {
   return (
     <article className="question-card">
       <div className="question-heading">
-        <span>{question.required ? "Obligatoria" : "Opcional"}</span>
+        <div className="question-meta">
+          <span className="question-number">
+            Pregunta {number} de {totalQuestions}
+          </span>
+          <span className="question-requirement">
+            {question.required ? "Obligatoria" : "Opcional"}
+          </span>
+        </div>
         <h3>{question.title}</h3>
         {"hint" in question && question.hint && <p>{question.hint}</p>}
       </div>
@@ -274,7 +285,17 @@ export function SurveyApp({
         ? 100
         : Math.round((step / (totalSteps - 1)) * 100),
     section = step > 0 && step <= sections.length ? sections[step - 1] : null,
-    answered = useMemo(() => Object.keys(answers).length, [answers]);
+    answered = useMemo(() => Object.keys(answers).length, [answers]),
+    questionNumbers = useMemo(
+      () =>
+        new Map(
+          sections
+            .flatMap((surveySection) => surveySection.questions)
+            .map((question, index) => [question.id, index + 1]),
+        ),
+      [sections],
+    ),
+    totalQuestions = questionNumbers.size;
   useEffect(() => setCode(makeCode()), []);
   const updateCode = (v: string) => {
     const raw = v
@@ -439,6 +460,8 @@ export function SurveyApp({
               <QuestionCard
                 key={q.id}
                 question={q}
+                number={questionNumbers.get(q.id) || 1}
+                totalQuestions={totalQuestions}
                 answer={answers[q.id]}
                 setAnswer={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
               />
