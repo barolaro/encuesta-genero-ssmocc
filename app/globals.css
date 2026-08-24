@@ -371,14 +371,32 @@ textarea:focus {
   padding: 28px;
   margin: 18px 0;
 }
-.question-heading span {
+.question-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.question-heading .question-number {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 10px;
+  border-radius: 99px;
+  color: #fff;
+  background: var(--blue);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+.question-heading .question-requirement {
   color: var(--blue);
   font-size: 0.7rem;
   text-transform: uppercase;
   font-weight: 800;
 }
 .question-heading h3 {
-  margin: 9px 0 5px;
+  margin: 0 0 5px;
   font-size: 1.08rem;
 }
 .question-heading p {
