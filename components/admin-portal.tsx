@@ -28,7 +28,7 @@ import {
   SSMOCC_ESTABLISHMENTS,
   type InstitutionSettings,
 } from "@/config/institution";
-import type { SurveySection } from "@/config/survey";
+import type { Question, SurveySection } from "@/config/survey";
 import type { SurveyAnalysis } from "@/lib/survey-analysis";
 
 type Survey = {
@@ -295,7 +295,137 @@ function EditSurvey({
       structuredClone(survey.sections),
     ),
     [error, setError] = useState("");
+
+  const updateQuestion = (
+    sectionIndex: number,
+    questionIndex: number,
+    update: (question: Question) => Question,
+  ) =>
+    setSections((current) =>
+      current.map((section, index) =>
+        index === sectionIndex
+          ? {
+              ...section,
+              questions: section.questions.map((question, questionPosition) =>
+                questionPosition === questionIndex
+                  ? update(question)
+                  : question,
+              ),
+            }
+          : section,
+      ),
+    );
+
+  const newQuestion = (): Question => ({
+    id: `question-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    type: "single",
+    title: "Nueva pregunta",
+    required: true,
+    options: ["Alternativa 1", "Alternativa 2"],
+  });
+
+  const changeQuestionType = (
+    question: Question,
+    type: Question["type"],
+  ): Question => {
+    const base = {
+      id: question.id,
+      title: question.title,
+      required: question.required,
+    };
+    if (type === "single" || type === "multiple")
+      return {
+        ...base,
+        type,
+        options:
+          question.type === "single" || question.type === "multiple"
+            ? question.options
+            : ["Alternativa 1", "Alternativa 2"],
+      };
+    if (type === "dichotomous" || type === "likert")
+      return {
+        ...base,
+        type,
+        rows:
+          question.type === "dichotomous" || question.type === "likert"
+            ? question.rows
+            : ["Nueva afirmación"],
+      };
+    return { ...base, type: "text", maxLength: 1000 };
+  };
+
+  const removeQuestion = (sectionIndex: number, questionIndex: number) => {
+    if (!window.confirm("¿Eliminar esta pregunta de la encuesta?")) return;
+    setSections((current) =>
+      current.map((section, index) =>
+        index === sectionIndex
+          ? {
+              ...section,
+              questions: section.questions.filter(
+                (_, position) => position !== questionIndex,
+              ),
+            }
+          : section,
+      ),
+    );
+  };
+
   const save = async () => {
+    const cleanSections = sections.map((section) => ({
+      ...section,
+      title: section.title.trim(),
+      questions: section.questions.map((question) => {
+        const cleanQuestion = { ...question, title: question.title.trim() };
+        if (
+          cleanQuestion.type === "single" ||
+          cleanQuestion.type === "multiple"
+        )
+          return {
+            ...cleanQuestion,
+            options: cleanQuestion.options
+              .map((item) => item.trim())
+              .filter(Boolean),
+          };
+        if (
+          cleanQuestion.type === "dichotomous" ||
+          cleanQuestion.type === "likert"
+        )
+          return {
+            ...cleanQuestion,
+            rows: cleanQuestion.rows.map((item) => item.trim()).filter(Boolean),
+          };
+        return cleanQuestion;
+      }),
+    }));
+    if (!title.trim()) return setError("Escribe el título de la encuesta.");
+    if (
+      cleanSections.some(
+        (section) => !section.title || !section.questions.length,
+      )
+    )
+      return setError(
+        "Cada sección debe tener un título y al menos una pregunta.",
+      );
+    if (
+      cleanSections.some((section) =>
+        section.questions.some((question) => !question.title),
+      )
+    )
+      return setError("Todas las preguntas deben tener un enunciado.");
+    if (
+      cleanSections.some((section) =>
+        section.questions.some(
+          (question) =>
+            ((question.type === "single" || question.type === "multiple") &&
+              question.options.length < 2) ||
+            ((question.type === "dichotomous" || question.type === "likert") &&
+              question.rows.length < 1),
+        ),
+      )
+    )
+      return setError(
+        "Las preguntas de selección necesitan al menos 2 alternativas y las matrices al menos 1 afirmación.",
+      );
     const r = await fetch("/api/admin/surveys", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -303,7 +433,7 @@ function EditSurvey({
         id: survey.id,
         title,
         description,
-        sections,
+        sections: cleanSections,
         units: survey.units,
       }),
     });
@@ -352,37 +482,152 @@ function EditSurvey({
                   }
                 />
               </label>
-              {section.questions.map((question, qi) => (
-                <div className="builder-question" key={question.id}>
-                  <span>{qi + 1}</span>
-                  <input
-                    value={question.title}
-                    onChange={(e) =>
-                      setSections((current) =>
-                        current.map((s, i) =>
-                          i === si
-                            ? {
-                                ...s,
-                                questions: s.questions.map((q, n) =>
-                                  n === qi
-                                    ? { ...q, title: e.target.value }
-                                    : q,
-                                ),
-                              }
-                            : s,
-                        ),
-                      )
-                    }
-                  />
-                  <select value={question.type} disabled>
-                    <option value="single">Selección única</option>
-                    <option value="multiple">Selección múltiple</option>
-                    <option value="dichotomous">Sí / No</option>
-                    <option value="likert">Escala Likert</option>
-                    <option value="text">Texto libre</option>
-                  </select>
-                </div>
-              ))}
+              {section.questions.map((question, qi) => {
+                const questionNumber =
+                  sections
+                    .slice(0, si)
+                    .reduce((total, item) => total + item.questions.length, 0) +
+                  qi +
+                  1;
+                return (
+                  <div className="editor-question" key={question.id}>
+                    <div className="editor-question-head">
+                      <span>{questionNumber}</span>
+                      <input
+                        aria-label={`Enunciado de la pregunta ${questionNumber}`}
+                        value={question.title}
+                        onChange={(e) =>
+                          updateQuestion(si, qi, (current) => ({
+                            ...current,
+                            title: e.target.value,
+                          }))
+                        }
+                      />
+                      <select
+                        aria-label={`Tipo de la pregunta ${questionNumber}`}
+                        value={question.type}
+                        onChange={(e) =>
+                          updateQuestion(si, qi, (current) =>
+                            changeQuestionType(
+                              current,
+                              e.target.value as Question["type"],
+                            ),
+                          )
+                        }
+                      >
+                        <option value="single">Selección única</option>
+                        <option value="multiple">Selección múltiple</option>
+                        <option value="dichotomous">Sí / No</option>
+                        <option value="likert">Escala Likert</option>
+                        <option value="text">Texto libre</option>
+                      </select>
+                      <button
+                        type="button"
+                        className="remove-question-button"
+                        aria-label={`Eliminar pregunta ${questionNumber}`}
+                        title="Eliminar pregunta"
+                        onClick={() => removeQuestion(si, qi)}
+                      >
+                        <Trash2 size={17} />
+                      </button>
+                    </div>
+                    <div className="editor-question-settings">
+                      <label className="required-control">
+                        <input
+                          type="checkbox"
+                          checked={question.required ?? false}
+                          onChange={(e) =>
+                            updateQuestion(si, qi, (current) => ({
+                              ...current,
+                              required: e.target.checked,
+                            }))
+                          }
+                        />
+                        Pregunta obligatoria
+                      </label>
+                      {(question.type === "single" ||
+                        question.type === "multiple") && (
+                        <label>
+                          Alternativas (una por línea)
+                          <textarea
+                            value={question.options.join("\n")}
+                            onChange={(e) =>
+                              updateQuestion(si, qi, (current) =>
+                                current.type === "single" ||
+                                current.type === "multiple"
+                                  ? {
+                                      ...current,
+                                      options: e.target.value.split("\n"),
+                                    }
+                                  : current,
+                              )
+                            }
+                          />
+                        </label>
+                      )}
+                      {(question.type === "dichotomous" ||
+                        question.type === "likert") && (
+                        <label>
+                          Ítems o afirmaciones (uno por línea)
+                          <textarea
+                            value={question.rows.join("\n")}
+                            onChange={(e) =>
+                              updateQuestion(si, qi, (current) =>
+                                current.type === "dichotomous" ||
+                                current.type === "likert"
+                                  ? {
+                                      ...current,
+                                      rows: e.target.value.split("\n"),
+                                    }
+                                  : current,
+                              )
+                            }
+                          />
+                        </label>
+                      )}
+                      {question.type === "text" && (
+                        <label className="text-limit-control">
+                          Máximo de caracteres
+                          <input
+                            type="number"
+                            min={100}
+                            max={5000}
+                            value={question.maxLength ?? 1000}
+                            onChange={(e) =>
+                              updateQuestion(si, qi, (current) =>
+                                current.type === "text"
+                                  ? {
+                                      ...current,
+                                      maxLength: Number(e.target.value),
+                                    }
+                                  : current,
+                              )
+                            }
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              <button
+                type="button"
+                className="ghost-button add-question-button"
+                onClick={() =>
+                  setSections((current) =>
+                    current.map((item, index) =>
+                      index === si
+                        ? {
+                            ...item,
+                            questions: [...item.questions, newQuestion()],
+                          }
+                        : item,
+                    ),
+                  )
+                }
+              >
+                <Plus size={17} /> Agregar pregunta a esta sección
+              </button>
             </div>
           ))}
           {error && <div className="admin-error">{error}</div>}
