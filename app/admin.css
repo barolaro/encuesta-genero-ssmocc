@@ -1211,6 +1211,82 @@
 .builder-section > .ghost-button {
   margin-top: 8px;
 }
+.editor-question {
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid #d8e0ea;
+  border-radius: 12px;
+  background: #fff;
+}
+.editor-question-head {
+  display: grid;
+  grid-template-columns: 30px minmax(240px, 1fr) 180px 40px;
+  gap: 9px;
+  align-items: center;
+}
+.editor-question-head > span {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #0039a6;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+.editor-question-head input,
+.editor-question-head select,
+.editor-question-settings input,
+.editor-question-settings textarea {
+  width: 100%;
+  background: #fff;
+}
+.remove-question-button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #f1cbd0;
+  border-radius: 9px;
+  color: #b42336;
+  background: #fff5f6;
+  cursor: pointer;
+}
+.remove-question-button:hover {
+  background: #ffe9ec;
+  border-color: #e7a7af;
+}
+.editor-question-settings {
+  margin: 12px 0 0 39px;
+  display: grid;
+  gap: 12px;
+}
+.editor-question-settings .required-control {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  font-weight: 700;
+}
+.editor-question-settings .required-control input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+.editor-question-settings textarea {
+  min-height: 76px;
+  margin-top: 7px;
+  resize: vertical;
+}
+.editor-question-settings .text-limit-control {
+  max-width: 260px;
+}
+.add-question-button {
+  width: 100%;
+  justify-content: center;
+  border-style: dashed;
+}
 @media (max-width: 960px) {
   .entry-card {
     margin-top: 0;
@@ -1384,6 +1460,20 @@
   }
   .builder-question select {
     grid-column: 2;
+  }
+  .editor-question-head {
+    grid-template-columns: 30px minmax(0, 1fr) 40px;
+  }
+  .editor-question-head select {
+    grid-column: 2 / 4;
+    grid-row: 2;
+  }
+  .editor-question-head .remove-question-button {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .editor-question-settings {
+    margin-left: 0;
   }
   .login-brand {
     padding: 28px 24px;
