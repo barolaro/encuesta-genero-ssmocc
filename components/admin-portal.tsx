@@ -331,7 +331,9 @@ function EditSurvey({
     const base = {
       id: question.id,
       title: question.title,
+      hint: question.hint,
       required: question.required,
+      condition: question.condition,
     };
     if (type === "single" || type === "multiple")
       return {
@@ -375,7 +377,11 @@ function EditSurvey({
       ...section,
       title: section.title.trim(),
       questions: section.questions.map((question) => {
-        const cleanQuestion = { ...question, title: question.title.trim() };
+        const cleanQuestion = {
+          ...question,
+          title: question.title.trim(),
+          hint: question.hint?.trim() || undefined,
+        };
         if (
           cleanQuestion.type === "single" ||
           cleanQuestion.type === "multiple"
@@ -426,6 +432,21 @@ function EditSurvey({
       return setError(
         "Las preguntas de selección necesitan al menos 2 alternativas y las matrices al menos 1 afirmación.",
       );
+    const precedingQuestions = new Map<string, Question>();
+    for (const question of cleanSections.flatMap((item) => item.questions)) {
+      if (question.condition) {
+        const source = precedingQuestions.get(question.condition.questionId);
+        if (
+          !source ||
+          source.type !== "single" ||
+          !source.options.includes(question.condition.value)
+        )
+          return setError(
+            `Revisa la condición de “${question.title}”: la pregunta o alternativa vinculada cambió o fue eliminada.`,
+          );
+      }
+      precedingQuestions.set(question.id, question);
+    }
     const r = await fetch("/api/admin/surveys", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -489,6 +510,16 @@ function EditSurvey({
                     .reduce((total, item) => total + item.questions.length, 0) +
                   qi +
                   1;
+                const previousSingleQuestions = sections
+                  .flatMap((item) => item.questions)
+                  .slice(0, questionNumber - 1)
+                  .filter(
+                    (item): item is Extract<Question, { type: "single" }> =>
+                      item.type === "single",
+                  );
+                const conditionSource = previousSingleQuestions.find(
+                  (item) => item.id === question.condition?.questionId,
+                );
                 return (
                   <div className="editor-question" key={question.id}>
                     <div className="editor-question-head">
@@ -545,6 +576,75 @@ function EditSurvey({
                         />
                         Pregunta obligatoria
                       </label>
+                      <label>
+                        Ayuda al usuario (opcional)
+                        <textarea
+                          className="question-help-editor"
+                          value={question.hint ?? ""}
+                          placeholder="Explica brevemente el concepto. Se mostrará al pasar el mouse o tocar el ícono de ayuda."
+                          onChange={(e) =>
+                            updateQuestion(si, qi, (current) => ({
+                              ...current,
+                              hint: e.target.value,
+                            }))
+                          }
+                        />
+                      </label>
+                      <div className="condition-editor">
+                        <label>
+                          Visibilidad de la pregunta
+                          <select
+                            value={question.condition?.questionId ?? ""}
+                            onChange={(e) => {
+                              const source = previousSingleQuestions.find(
+                                (item) => item.id === e.target.value,
+                              );
+                              updateQuestion(si, qi, (current) => ({
+                                ...current,
+                                condition: source
+                                  ? {
+                                      questionId: source.id,
+                                      operator: "equals",
+                                      value: source.options[0] ?? "",
+                                    }
+                                  : undefined,
+                              }));
+                            }}
+                          >
+                            <option value="">Siempre visible</option>
+                            {previousSingleQuestions.map((item) => (
+                              <option value={item.id} key={item.id}>
+                                Mostrar según: {item.title}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        {question.condition && conditionSource && (
+                          <label>
+                            Mostrar solamente cuando la respuesta sea
+                            <select
+                              value={question.condition.value}
+                              onChange={(e) =>
+                                updateQuestion(si, qi, (current) => ({
+                                  ...current,
+                                  condition: current.condition
+                                    ? {
+                                        ...current.condition,
+                                        value: e.target.value,
+                                      }
+                                    : undefined,
+                                }))
+                              }
+                            >
+                              {conditionSource.options.map((option) => (
+                                <option value={option} key={option}>
+                                  {option}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        )}
+                      </div>
                       {(question.type === "single" ||
                         question.type === "multiple") && (
                         <label>
