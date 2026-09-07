@@ -19,6 +19,19 @@ import {
   type SurveySection,
 } from "@/config/survey";
 type Answers = Record<string, string | string[] | Record<string, string>>;
+
+function hasCompleteAnswer(
+  question: Question,
+  answer: Answers[string] | undefined,
+) {
+  if (answer === undefined || answer === null) return false;
+  if (typeof answer === "string") return answer.trim().length > 0;
+  if (Array.isArray(answer)) return answer.length > 0;
+  if ("rows" in question)
+    return Object.keys(answer).length === question.rows.length;
+  return Object.keys(answer).length > 0;
+}
+
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const makeCode = () => {
   const values = crypto.getRandomValues(new Uint8Array(8));
@@ -163,15 +176,21 @@ function QuestionCard({
   totalQuestions,
   answer,
   setAnswer,
+  invalid,
 }: {
   question: Question;
   number: number;
   totalQuestions: number;
   answer: Answers[string] | undefined;
   setAnswer: (v: Answers[string]) => void;
+  invalid: boolean;
 }) {
+  const hintId = `question-hint-${question.id}`;
   return (
-    <article className="question-card">
+    <article
+      className={`question-card ${invalid ? "question-card-invalid" : ""}`}
+      id={`question-${question.id}`}
+    >
       <div className="question-heading">
         <div className="question-meta">
           <span className="question-number">
@@ -181,8 +200,28 @@ function QuestionCard({
             {question.required ? "Obligatoria" : "Opcional"}
           </span>
         </div>
-        <h3>{question.title}</h3>
-        {"hint" in question && question.hint && <p>{question.hint}</p>}
+        <div className="question-title-row">
+          <h3>{question.title}</h3>
+          {question.hint && (
+            <span className="question-help">
+              <button
+                type="button"
+                aria-label="Ver explicación de esta pregunta"
+                aria-describedby={hintId}
+              >
+                ?
+              </button>
+              <span className="question-tooltip" id={hintId} role="tooltip">
+                {question.hint}
+              </span>
+            </span>
+          )}
+        </div>
+        {invalid && (
+          <p className="question-required-message" role="alert">
+            Completa esta pregunta para continuar.
+          </p>
+        )}
       </div>
       {question.type === "single" && (
         <div className="choice-grid">
@@ -278,6 +317,7 @@ export function SurveyApp({
     [unit, setUnit] = useState(""),
     [answers, setAnswers] = useState<Answers>({}),
     [error, setError] = useState(""),
+    [missingQuestionId, setMissingQuestionId] = useState(""),
     [sending, setSending] = useState(false);
   const totalSteps = sections.length + 2,
     progress =
@@ -285,7 +325,38 @@ export function SurveyApp({
         ? 100
         : Math.round((step / (totalSteps - 1)) * 100),
     section = step > 0 && step <= sections.length ? sections[step - 1] : null,
-    answered = useMemo(() => Object.keys(answers).length, [answers]),
+    visibleQuestions = useMemo(() => {
+      const result: Question[] = [];
+      const visibleIds = new Set<string>();
+      for (const question of sections.flatMap(
+        (surveySection) => surveySection.questions,
+      )) {
+        if (question.condition) {
+          const sourceVisible = visibleIds.has(question.condition.questionId);
+          const sourceAnswer = answers[question.condition.questionId];
+          const matches = Array.isArray(sourceAnswer)
+            ? sourceAnswer.includes(question.condition.value)
+            : sourceAnswer === question.condition.value;
+          const conditionMet =
+            question.condition.operator === "notEquals" ? !matches : matches;
+          if (!sourceVisible || !conditionMet) continue;
+        }
+        result.push(question);
+        visibleIds.add(question.id);
+      }
+      return result;
+    }, [answers, sections]),
+    visibleQuestionIds = useMemo(
+      () => new Set(visibleQuestions.map((question) => question.id)),
+      [visibleQuestions],
+    ),
+    answered = useMemo(
+      () =>
+        visibleQuestions.filter((question) =>
+          hasCompleteAnswer(question, answers[question.id]),
+        ).length,
+      [answers, visibleQuestions],
+    ),
     questionNumbers = useMemo(
       () =>
         new Map(
@@ -304,35 +375,40 @@ export function SurveyApp({
       .slice(0, 8);
     setCode(raw.length > 4 ? `${raw.slice(0, 4)}-${raw.slice(4)}` : raw);
   };
-  const valid = () =>
-    !section ||
-    section.questions
-      .filter((q) => q.required)
-      .every((q) => {
-        const v = answers[q.id];
-        return (
-          !!v &&
-          (!("rows" in q) || Object.keys(v as object).length === q.rows.length)
-        );
-      });
+  const firstInvalidQuestion = () =>
+    section?.questions
+      .filter((q) => q.required && visibleQuestionIds.has(q.id))
+      .find((q) => !hasCompleteAnswer(q, answers[q.id]));
+  const showMissingQuestion = (question: Question) => {
+    setMissingQuestionId(question.id);
+    setError("Completa la pregunta obligatoria destacada para continuar.");
+    window.requestAnimationFrame(() => {
+      const element = document.getElementById(`question-${question.id}`);
+      element?.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(
+        () =>
+          element
+            ?.querySelector<HTMLElement>("input, textarea, button")
+            ?.focus(),
+        450,
+      );
+    });
+  };
   const next = () => {
     setError("");
     if (step === 0 && (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code) || !unit))
       return setError(
         "Ingresa un código válido y selecciona tu unidad para continuar.",
       );
-    if (!valid())
-      return setError(
-        "Responde todas las preguntas obligatorias de esta sección.",
-      );
+    const missing = firstInvalidQuestion();
+    if (missing) return showMissingQuestion(missing);
+    setMissingQuestionId("");
     setStep((s) => s + 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const submit = async () => {
-    if (!valid())
-      return setError(
-        "Responde todas las preguntas obligatorias de esta sección.",
-      );
+    const missing = firstInvalidQuestion();
+    if (missing) return showMissingQuestion(missing);
     setSending(true);
     setError("");
     try {
@@ -343,7 +419,11 @@ export function SurveyApp({
             surveyId: survey?.id,
             anonymousCode: code,
             unit,
-            responses: answers,
+            responses: Object.fromEntries(
+              Object.entries(answers).filter(([questionId]) =>
+                visibleQuestionIds.has(questionId),
+              ),
+            ),
           }),
         }),
         b = await r.json();
@@ -456,16 +536,23 @@ export function SurveyApp({
               <h1>{section.title}</h1>
               <p>{section.description}</p>
             </div>
-            {section.questions.map((q) => (
-              <QuestionCard
-                key={q.id}
-                question={q}
-                number={questionNumbers.get(q.id) || 1}
-                totalQuestions={totalQuestions}
-                answer={answers[q.id]}
-                setAnswer={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
-              />
-            ))}
+            {section.questions
+              .filter((q) => visibleQuestionIds.has(q.id))
+              .map((q) => (
+                <QuestionCard
+                  key={q.id}
+                  question={q}
+                  number={questionNumbers.get(q.id) || 1}
+                  totalQuestions={totalQuestions}
+                  answer={answers[q.id]}
+                  invalid={missingQuestionId === q.id}
+                  setAnswer={(v) => {
+                    setAnswers((a) => ({ ...a, [q.id]: v }));
+                    if (missingQuestionId === q.id && hasCompleteAnswer(q, v))
+                      setMissingQuestionId("");
+                  }}
+                />
+              ))}
             {error && (
               <p className="error centered" role="alert">
                 {error}
