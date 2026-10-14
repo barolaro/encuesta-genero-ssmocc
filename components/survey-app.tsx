@@ -78,7 +78,7 @@ function SiteFooter({ institution }: { institution: InstitutionSettings }) {
         {institution.institutionName} · {institution.networkShortName}
       </p>
       <p className="developer-credit">
-        Diseño y desarrollo: <strong>Bayron Retamal González</strong>
+        Diseño y desarrollo: <strong>Departamento de Género y Derechos Humanos</strong>
       </p>
     </footer>
   );
