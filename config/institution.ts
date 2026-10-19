@@ -17,6 +17,7 @@ export type InstitutionSettings = {
 };
 
 export const SSMOCC_ESTABLISHMENTS = [
+  { name: "Servicio de Salud Metropolitano Occidente", shortName: "SSMOCC", logoUrl: "/logo-ssmocc-oficial.png" },
   { name: "Hospital San Juan de Dios", shortName: "HSJD", logoUrl: "/logo-hsjd.png" },
   { name: "Hospital Clínico Dr. Félix Bulnes Cerda", shortName: "HFBC", logoUrl: "/logo-felix-bulnes.png" },
   { name: "Hospital San José de Melipilla", shortName: "HSJM", logoUrl: "/logo-melipilla.png" },
